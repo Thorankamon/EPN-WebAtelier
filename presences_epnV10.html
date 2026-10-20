@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EPN - Gestion des présences</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --blue:#2a7fd4; --blue2:#1a6bbf; --blue3:#0d4f9a; --blue-light:#5ba3e8; --blue-pale:#deeefb;
+    --green:#5aad2e; --green2:#4a9422; --green-pale:#e8f5dc;
+    --yellow:#e8a800; --yellow2:#d49400; --yellow-light:#ffd84d; --yellow-pale:#fff8dc;
+    --red:#c0392b; --red2:#922b21; --red-pale:#fde8e8;
+    --purple:#7c3aed; --purple-pale:#f5f3ff;
+    --orange:#d97706; --orange-pale:#fff7ed;
+    --cyan:#0891b2; --cyan-pale:#ecfeff;
+    --text:#1a2b4a; --text2:#4a6080; --text3:#7a98b8;
+    --border:#b0cce8; --border2:#d0e4f4;
+    --glass:rgba(255,255,255,0.82);
+    --shadow:rgba(30,80,160,0.15); --shadow2:rgba(30,80,160,0.08);
+    --radius:12px; --radius-lg:18px; --radius-xl:22px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Nunito','Segoe UI',sans-serif;
+    font-size:14px;
+    background:linear-gradient(160deg,#cde8f8 0%,#e2f0fb 25%,#d8edff 50%,#e8f5dc 75%,#fff8dc 100%);
+    min-height:100vh;
+    padding:24px;
+    color:var(--text);
+    position:relative;
+  }
+  body::before {
+    content:''; position:fixed; top:-150px; left:-150px;
+    width:550px; height:550px;
+    background:radial-gradient(circle,rgba(168,213,244,0.5),transparent 70%);
+    pointer-events:none; z-index:0; border-radius:50%;
+  }
+  body::after {
+    content:''; position:fixed; bottom:-100px; right:5%;
+    width:450px; height:450px;
+    background:radial-gradient(circle,rgba(184,232,154,0.4),transparent 70%);
+    pointer-events:none; z-index:0; border-radius:50%;
+  }
+
+  .container { max-width:1300px; margin:0 auto; position:relative; z-index:2; }
+
+  .company-header {
+    background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(180,220,250,.88),rgba(120,185,240,.92));
+    border:1px solid rgba(255,255,255,.95);
+    color:var(--blue3);
+    padding:20px 28px;
+    border-radius:var(--radius-xl);
+    margin-bottom:20px;
+    box-shadow:0 4px 20px var(--shadow2),0 1px 0 rgba(255,255,255,.9) inset;
+    position:relative; overflow:hidden; z-index:1;
+    text-align:center;
+  }
+  .company-header::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:50%;
+    background:rgba(255,255,255,.4); border-radius:var(--radius-xl) var(--radius-xl) 60% 60%;
+    pointer-events:none;
+  }
+  .company-header strong { font-size:1.6em; font-weight:900; display:block; margin-bottom:4px; position:relative; }
+  .company-header span { color:var(--text2); font-weight:700; position:relative; }
+
+  /* ── Onglets ── */
+  .tabs {
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; position:relative; z-index:1;
+  }
+  .tab-btn {
+    flex:1; min-width:160px;
+    background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(210,228,248,.7));
+    border:1px solid rgba(255,255,255,.9);
+    color:var(--text2);
+    padding:14px 18px;
+    border-radius:var(--radius-lg);
+    cursor:pointer;
+    font-family:'Nunito',sans-serif;
+    font-weight:800; font-size:1rem;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:all .25s;
+    box-shadow:0 2px 8px var(--shadow2),0 1px 0 rgba(255,255,255,.9) inset;
+  }
+  .tab-btn:hover { transform:translateY(-2px); box-shadow:0 6px 16px var(--shadow); }
+  .tab-btn.active {
+    background:linear-gradient(180deg,#7cc4f8,#2a7fd4,#1558b0);
+    color:#fff; border-color:#1050a0;
+    box-shadow:0 4px 14px rgba(30,80,180,.35),0 1px 0 rgba(255,255,255,.4) inset;
+  }
+
+  .tab-content { display:none; }
+  .tab-content.active { display:block; animation:fadeIn .3s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .card {
+    background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(215,238,255,.75));
+    border:1px solid rgba(255,255,255,.95);
+    padding:26px;
+    border-radius:var(--radius-xl);
+    box-shadow:0 4px 16px var(--shadow2),0 1px 0 rgba(255,255,255,.9) inset;
+    backdrop-filter:blur(10px);
+    position:relative;
+    margin-bottom:22px;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:5px;
+    background:linear-gradient(90deg,var(--blue-light),var(--green),var(--yellow));
+    border-top-left-radius:inherit; border-top-right-radius:inherit;
+  }
+  /* La carte de recherche doit passer AU-DESSUS des cartes suivantes,
+     sinon la liste de suggestions (qui déborde en dessous) se retrouve
+     cachée derrière la carte du formulaire qui la suit. */
+  #searchCard { position:relative; z-index:30; }
+  .card h2 { color:var(--blue3); margin-bottom:18px; font-size:1.35em; font-weight:900; display:flex; align-items:center; gap:10px; }
+  .card h3 { color:var(--blue3); margin:6px 0 12px; font-size:1.05em; font-weight:800; }
+
+  /* ── Formulaires ── */
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field label { font-weight:800; color:var(--text2); font-size:.85rem; }
+  .field input, .field select {
+    padding:11px 14px; border-radius:var(--radius); border:1.5px solid var(--border);
+    background:rgba(255,255,255,.85); font-family:'Nunito',sans-serif; font-size:.95rem;
+    color:var(--text); font-weight:600; transition:all .2s;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--blue-light); box-shadow:0 0 0 3px var(--blue-pale); }
+  .field .readout {
+    padding:11px 14px; border-radius:var(--radius); border:1.5px dashed var(--border);
+    background:var(--blue-pale); font-weight:800; color:var(--blue3);
+  }
+  .radio-row { display:flex; gap:14px; flex-wrap:wrap; padding-top:4px; }
+  .radio-row label { display:flex; align-items:center; gap:6px; font-weight:700; color:var(--text2); cursor:pointer; }
+
+  .search-wrap { position:relative; margin-bottom:20px; }
+  .search-wrap input {
+    width:100%; padding:13px 18px; border-radius:50px; border:1.5px solid var(--border);
+    background:rgba(255,255,255,.9); font-family:'Nunito',sans-serif; font-weight:700; font-size:1rem; color:var(--text);
+  }
+  .search-wrap input:focus { outline:none; border-color:var(--blue-light); box-shadow:0 0 0 3px var(--blue-pale); }
+  .suggestions {
+    position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:20;
+    background:#fff; border:1px solid var(--border2); border-radius:var(--radius-lg);
+    box-shadow:0 8px 24px var(--shadow); max-height:280px; overflow-y:auto; display:none;
+  }
+  .suggestions.show { display:block; }
+  .suggestion-item { padding:11px 18px; cursor:pointer; border-bottom:1px solid var(--border2); font-weight:700; }
+  .suggestion-item:last-child { border-bottom:none; }
+  .suggestion-item:hover { background:var(--blue-pale); }
+  .suggestion-item small { display:block; color:var(--text3); font-weight:600; }
+
+  .btn {
+    padding:12px 24px; border:none; border-radius:var(--radius); font-size:15px; font-weight:800;
+    cursor:pointer; transition:all .3s ease; display:inline-flex; align-items:center; gap:8px;
+    font-family:'Nunito',sans-serif; position:relative; overflow:hidden;
+  }
+  .btn::before { content:''; position:absolute; top:0; left:0; right:0; height:50%; background:rgba(255,255,255,.3); border-radius:var(--radius) var(--radius) 0 0; pointer-events:none; }
+  .btn-primary { background:linear-gradient(180deg,#7cc4f8,#2a7fd4,#1558b0); color:#fff; border:1px solid #1050a0; box-shadow:0 2px 8px rgba(30,80,180,.25),0 1px 0 rgba(255,255,255,.4) inset; }
+  .btn-primary:hover { background:linear-gradient(180deg,#90d4ff,#3a90e4,#1a6cc0); transform:translateY(-2px); box-shadow:0 4px 14px rgba(30,80,180,.4); }
+  .btn-green { background:linear-gradient(180deg,#8fd35f,#5aad2e,#3f7d1f); color:#fff; border:1px solid #3a7018; box-shadow:0 2px 8px rgba(60,140,20,.25),0 1px 0 rgba(255,255,255,.4) inset; }
+  .btn-green:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(60,140,20,.4); }
+  .btn-secondary { background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(210,228,248,.85)); color:var(--text2); border:1px solid var(--border); box-shadow:0 2px 8px var(--shadow2),0 1px 0 rgba(255,255,255,.9) inset; }
+  .btn-secondary:hover { background:linear-gradient(180deg,#fff,#d0e4f8); color:var(--blue3); transform:translateY(-2px); }
+  .btn-danger { background:linear-gradient(180deg,#f08080,#c0392b,#922b21); color:#fff; border:1px solid #882020; box-shadow:0 2px 8px rgba(180,40,30,.3),0 1px 0 rgba(255,255,255,.4) inset; }
+  .btn-danger:hover { background:linear-gradient(180deg,#f89898,#d44040,#a03030); transform:translateY(-2px); }
+  .btn-small { padding:7px 14px; font-size:13px; }
+  .btn-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
+
+  /* ── Tableaux ── */
+  .table-container {
+    background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(215,238,255,.75));
+    border:1px solid rgba(255,255,255,.95); padding:26px; border-radius:var(--radius-xl);
+    box-shadow:0 4px 16px var(--shadow2),0 1px 0 rgba(255,255,255,.9) inset; backdrop-filter:blur(10px); margin-bottom:22px;
+  }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; padding:10px 12px; color:var(--blue3); font-weight:900; border-bottom:2px solid var(--border); font-size:.85rem; text-transform:uppercase; letter-spacing:.3px; }
+  td { padding:10px 12px; border-bottom:1px solid var(--border2); font-weight:600; color:var(--text); font-size:.92rem; }
+  tr:hover td { background:rgba(210,235,255,.35); }
+  .badge { display:inline-block; padding:3px 11px; border-radius:50px; font-weight:800; font-size:.78rem; color:#fff; }
+  .badge-M { background:var(--blue); } .badge-F { background:#e0629a; } .badge-NP { background:var(--text3); }
+  .badge-type { background:linear-gradient(135deg,var(--purple),#5b21b6); }
+  .empty-msg { text-align:center; padding:30px; color:var(--text3); font-weight:700; }
+
+  /* ── Stats ── */
+  .stat-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-bottom:22px; }
+  .stat-card {
+    background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(220,240,255,.8));
+    border:1px solid rgba(255,255,255,.95); border-radius:var(--radius-lg); padding:18px; text-align:center;
+    box-shadow:0 3px 12px var(--shadow2); position:relative; overflow:hidden;
+  }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--blue-light),var(--green)); }
+  .stat-card .val { font-size:1.9rem; font-weight:900; color:var(--blue3); line-height:1.1; }
+  .stat-card .lbl { font-size:.78rem; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; margin-top:6px; }
+
+  .period-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
+  .period-bar .field { min-width:150px; }
+
+  .chart-row { display:grid; grid-template-columns:1.3fr 1fr; gap:20px; }
+  @media (max-width:800px) { .chart-row { grid-template-columns:1fr; } }
+  .bars { display:flex; align-items:flex-end; gap:14px; height:200px; padding:10px 6px 0; }
+  .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .bar-fill { width:100%; max-width:46px; border-radius:8px 8px 3px 3px; background:linear-gradient(180deg,var(--blue-light),var(--blue2)); transition:height .4s; position:relative; }
+  .bar-fill .bv { position:absolute; top:-22px; left:0; right:0; text-align:center; font-weight:900; color:var(--blue3); font-size:.85rem; }
+  .bar-lbl { margin-top:8px; font-weight:800; font-size:.78rem; color:var(--text2); text-align:center; }
+
+  .donut-wrap { display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .donut { width:170px; height:170px; border-radius:50%; }
+  .legend { display:flex; flex-direction:column; gap:8px; width:100%; }
+  .legend-item { display:flex; align-items:center; gap:8px; font-weight:700; font-size:.85rem; }
+  .legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+
+  /* ── Formations (rapport) ── */
+  .form-list-item { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,.7); border-radius:var(--radius); border:1px solid var(--border2); margin-bottom:8px; }
+  .form-list-item strong { color:var(--blue3); }
+  .form-list-item span { color:var(--text3); font-weight:700; font-size:.85rem; margin-left:8px; }
+
+  .msg { padding:12px 18px; border-radius:var(--radius); font-weight:800; margin-bottom:16px; }
+  .msg-success { background:var(--green-pale); color:var(--green2); border:1px solid var(--green); }
+
+
+  .backup-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; margin:-8px 0 18px; font-weight:800; color:var(--text2); font-size:.85rem; position:relative; z-index:1; }
+  /* ── Agenda du mois ── */
+  .ag-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:6px; }
+  .ag-toolbar .field { min-width:150px; }
+  .ag-nav { display:flex; gap:8px; align-items:flex-end; }
+  .field textarea {
+    padding:11px 14px; border-radius:var(--radius); border:1.5px solid var(--border);
+    background:rgba(255,255,255,.85); font-family:'Nunito',sans-serif; font-size:.95rem;
+    color:var(--text); font-weight:600; resize:vertical; min-height:60px;
+  }
+  .field textarea:focus { outline:none; border-color:var(--blue-light); box-shadow:0 0 0 3px var(--blue-pale); }
+
+  #agendaSheet { background:#fff; border-radius:var(--radius-xl); overflow:hidden; border:1px solid var(--border2); box-shadow:0 4px 16px var(--shadow2); }
+  .ag-banner { position:relative; height:190px; background-size:cover; background-position:center; display:flex; align-items:flex-end; }
+  .ag-banner::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(13,79,154,.05),rgba(13,79,154,.72)); }
+  .ag-banner-txt { position:relative; z-index:2; padding:18px 26px; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.4); }
+  .ag-banner-txt h1 { font-size:2rem; font-weight:900; line-height:1.1; text-transform:capitalize; }
+  .ag-banner-txt p { font-weight:700; opacity:.95; margin-top:4px; }
+  .ag-body { padding:22px 26px 26px; }
+  .ag-cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:22px; }
+  .ag-dow { text-align:center; font-weight:900; font-size:.75rem; color:var(--blue3); text-transform:uppercase; padding:6px 0; }
+  .ag-cell { min-height:78px; border:1px solid var(--border2); border-radius:8px; padding:4px 5px; background:#fff; overflow:hidden; }
+  .ag-cell.off { background:#f1f4f8; }
+  .ag-cell.out { background:transparent; border-color:transparent; }
+  .ag-cell.today { border-color:var(--blue); box-shadow:0 0 0 2px var(--blue-pale) inset; }
+  .ag-cell .dn { font-weight:900; font-size:.78rem; color:var(--text3); }
+  .ag-chip { display:block; margin-top:3px; padding:2px 5px; border-radius:5px; font-size:.68rem; font-weight:800; color:#fff; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ag-chip.animation { background:var(--green); }
+  .ag-chip.formation { background:var(--blue); }
+  .ag-list h3 { margin-top:0; }
+  .ag-item { display:flex; gap:12px; justify-content:space-between; align-items:flex-start; padding:11px 14px; border-radius:var(--radius); border:1px solid var(--border2); border-left:5px solid var(--blue); margin-bottom:8px; background:#fafcff; page-break-inside:avoid; }
+  .ag-item.animation { border-left-color:var(--green); }
+  .ag-item .ag-date { font-weight:900; color:var(--blue3); font-size:.85rem; min-width:112px; }
+  .ag-item .ag-tt { font-weight:800; color:var(--text); }
+  .ag-item .ag-tag { display:inline-block; font-size:.68rem; font-weight:900; padding:2px 8px; border-radius:50px; color:#fff; margin-right:6px; vertical-align:middle; }
+  .ag-item .ag-tag.animation { background:var(--green); }
+  .ag-item .ag-tag.formation { background:var(--blue); }
+  .ag-item .ag-cm { color:var(--text2); font-weight:600; font-size:.85rem; margin-top:3px; white-space:pre-wrap; }
+  .ag-item .ag-actions { display:flex; gap:6px; flex-shrink:0; }
+  .ag-pdfmode .ag-actions { display:none !important; }
+
+  /* ── Modale ── */
+  .modal-back { position:fixed; inset:0; background:rgba(13,40,80,.55); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-back.show { display:flex; }
+  .modal-box { background:#fff; border-radius:var(--radius-xl); width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.35); overflow:hidden; }
+  .modal-head { padding:18px 24px; background:linear-gradient(135deg,#7cc4f8,#2a7fd4,#1558b0); color:#fff; display:flex; justify-content:space-between; align-items:center; }
+  .modal-head h2 { font-size:1.2rem; font-weight:900; }
+  .modal-x { background:none; border:none; color:#fff; font-size:1.6rem; cursor:pointer; line-height:1; }
+  .modal-body { padding:20px 24px; overflow-y:auto; }
+  .modal-foot { padding:14px 24px; border-top:1px solid var(--border2); display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; background:#f6faff; }
+  .ct-tools { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .ct-list { border:1px solid var(--border2); border-radius:var(--radius); max-height:240px; overflow-y:auto; }
+  .ct-row { display:flex; gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--border2); cursor:pointer; font-weight:700; }
+  .ct-row:last-child { border-bottom:none; }
+  .ct-row:hover { background:var(--blue-pale); }
+  .ct-row small { color:var(--text3); font-weight:600; display:block; }
+  .ct-row input { width:18px; height:18px; }
+  .ct-count { font-weight:800; color:var(--blue3); margin-left:auto; }
+  .modal-body .field { margin-top:12px; }
+  .modal-body .field input, .modal-body .field textarea { width:100%; }
+
+  @media print {
+    body { background:#fff !important; padding:0; }
+    .tabs, .no-print { display:none !important; }
+    .tab-content { display:none !important; }
+    .tab-content.print-active { display:block !important; }
+    .card, .table-container { box-shadow:none; border:1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="company-header">
+    <strong>🖥️ EPN — Gestion des présences</strong>
+    <span>Encodage, statistiques et rapports</span>
+  </div>
+
+  <div class="tabs no-print">
+    <button class="tab-btn active" data-tab="tab-form">📝 Formulaire</button>
+    <button class="tab-btn" data-tab="tab-stats">📊 Statistiques</button>
+    <button class="tab-btn" data-tab="tab-list">👥 Personnes</button>
+    <button class="tab-btn" data-tab="tab-report">📄 Rapports</button>
+    <button class="tab-btn" data-tab="tab-agenda">🗓️ Agenda du mois</button>
+  </div>
+
+  <div class="backup-bar no-print">
+    <span>💾 Sauvegarde complète (personnes, présences, formations, agenda) :</span>
+    <button class="btn btn-secondary btn-small" id="topExportBtn" type="button">⬇️ Exporter tout (JSON)</button>
+    <button class="btn btn-secondary btn-small" id="topImportBtn" type="button">⬆️ Importer un JSON</button>
+  </div>
+
+  <!-- ================= TAB 1 : FORMULAIRE ================= -->
+  <div id="tab-form" class="tab-content active">
+    <div class="card" id="searchCard">
+      <h2>🔎 Rechercher vous pour pointer</h2>
+      <div class="search-wrap">
+        <input type="text" id="searchPerson" placeholder="Tapez un nom, prénom, email ou téléphone...">
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+      <div id="searchMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="formTitle">➕ Nouvelle fiche / Pointage</h2>
+      <form id="personForm">
+        <input type="hidden" id="personId">
+        <div class="form-grid">
+          <div class="field"><label>Nom *</label><input type="text" id="nom" required></div>
+          <div class="field"><label>Prénom *</label><input type="text" id="prenom" required></div>
+          <div class="field"><label>Email</label><input type="email" id="email"></div>
+          <div class="field"><label>Téléphone</label><input type="tel" id="telephone"></div>
+          <div class="field"><label>Date de naissance</label><input type="date" id="naissance"></div>
+          <div class="field"><label>Âge</label><div class="readout" id="ageReadout">—</div></div>
+          <div class="field"><label>Adresse</label><input type="text" id="adresse"></div>
+          <div class="field"><label>Localité</label><input type="text" id="localite"></div>
+          <div class="field">
+            <label>Sexe</label>
+            <div class="radio-row">
+              <label><input type="radio" name="sexe" value="M" checked> M</label>
+              <label><input type="radio" name="sexe" value="F"> F</label>
+              <label><input type="radio" name="sexe" value="NP"> Non précisé</label>
+            </div>
+          </div>
+          <div class="field"><label>Date du pointage</label><input type="date" id="dateJour"></div>
+          <div class="field">
+            <label>Type d'activité</label>
+            <select id="typeActivite">
+              <option value="AI">AI</option>
+              <option value="AC">AC</option>
+              <option value="FO">FO</option>
+              <option value="RE">RE</option>
+              <option value="RL">RL</option>
+            </select>
+          </div>
+          <div class="field">
+            <label style="visibility:hidden;">.</label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text2);cursor:pointer;">
+              <input type="checkbox" id="doPointage" checked style="width:18px;height:18px;"> Enregistrer un pointage pour cette date
+            </label>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary">✅ Enregistrer</button>
+          <button type="button" class="btn btn-secondary" id="resetFormBtn">↺ Nouvelle fiche</button>
+        </div>
+      </form>
+      <div id="formMsg"></div>
+    </div>
+
+    <div class="table-container">
+      <h2 style="color:var(--blue3);font-weight:900;margin-bottom:16px;">📌 Pointages du jour sélectionné</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Âge</th><th>Localité</th><th>Type</th><th>Heure</th></tr></thead>
+          <tbody id="todayBody"></tbody>
+        </table>
+      </div>
+      <div id="todayEmpty" class="empty-msg" style="display:none;">Aucun pointage pour cette date.</div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2 : STATISTIQUES ================= -->
+  <div id="tab-stats" class="tab-content">
+    <div class="card">
+      <h2>📊 Période</h2>
+      <div class="period-bar">
+        <div class="field">
+          <label>Granularité</label>
+          <select id="statGranularite">
+            <option value="jour">Journalier</option>
+            <option value="mois">Mensuel</option>
+            <option value="trimestre">Trimestriel</option>
+            <option value="annee">Annuel</option>
+          </select>
+        </div>
+        <div class="field" id="statJourWrap"><label>Date</label><input type="date" id="statJour"></div>
+        <div class="field" id="statMoisWrap" style="display:none;"><label>Mois</label><input type="month" id="statMois"></div>
+        <div class="field" id="statTrimWrap" style="display:none;">
+          <label>Trimestre</label>
+          <select id="statTrimestre"><option value="1">T1 (Jan-Mars)</option><option value="2">T2 (Avr-Juin)</option><option value="3">T3 (Juil-Sept)</option><option value="4">T4 (Oct-Déc)</option></select>
+        </div>
+        <div class="field" id="statTrimAnneeWrap" style="display:none;"><label>Année</label><input type="number" id="statTrimAnnee" value="2026" min="2000" max="2100"></div>
+        <div class="field" id="statAnneeWrap" style="display:none;"><label>Année</label><input type="number" id="statAnnee" value="2026" min="2000" max="2100"></div>
+        <div class="field"><button class="btn btn-primary" id="calcStatsBtn">🔄 Calculer</button></div>
+      </div>
+    </div>
+
+    <div class="stat-cards" id="statCards"></div>
+
+    <div class="card">
+      <div class="chart-row">
+        <div>
+          <h3>Répartition par type d'activité</h3>
+          <div class="bars" id="typeBars"></div>
+        </div>
+        <div>
+          <h3>Répartition par sexe</h3>
+          <div class="donut-wrap">
+            <div class="donut" id="sexeDonut"></div>
+            <div class="legend" id="sexeLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container" id="statHistoWrap">
+      <h2 style="color:var(--blue3);font-weight:900;margin-bottom:16px;" id="statHistoTitle">🗓️ Détail de la période</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Date</th><th>Nom</th><th>Prénom</th><th>Sexe</th><th>Âge</th><th>Localité</th><th>Type</th></tr></thead>
+          <tbody id="statHistoBody"></tbody>
+        </table>
+      </div>
+      <div id="statHistoEmpty" class="empty-msg" style="display:none;">Aucune donnée pour cette période.</div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 3 : LISTE ================= -->
+  <div id="tab-list" class="tab-content">
+    <div class="card">
+      <h2>👥 Liste des personnes</h2>
+      <div class="search-wrap" style="margin-bottom:0;">
+        <input type="text" id="listSearch" placeholder="Filtrer par nom, prénom, email, localité...">
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-secondary" id="exportJsonBtn" type="button">💾 Exporter tout (JSON)</button>
+        <button class="btn btn-secondary" id="importJsonBtn" type="button">📂 Importer un JSON</button>
+        <input type="file" id="importJsonInput" accept="application/json" style="display:none;">
+      </div>
+    </div>
+    <div class="table-container">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Téléphone</th><th>Localité</th><th>Sexe</th><th>Âge</th><th>Visites</th><th>Actions</th></tr></thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <div id="listEmpty" class="empty-msg" style="display:none;">Aucune personne encodée.</div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 4 : RAPPORTS ================= -->
+  <div id="tab-report" class="tab-content">
+    <div class="card no-print">
+      <h2>📄 Générer un rapport</h2>
+      <div class="period-bar">
+        <div class="field">
+          <label>Granularité</label>
+          <select id="repGranularite">
+            <option value="jour">Journalier</option>
+            <option value="mois">Mensuel</option>
+            <option value="trimestre">Trimestriel</option>
+            <option value="annee">Annuel</option>
+          </select>
+        </div>
+        <div class="field" id="repJourWrap"><label>Date</label><input type="date" id="repJour"></div>
+        <div class="field" id="repMoisWrap" style="display:none;"><label>Mois</label><input type="month" id="repMois"></div>
+        <div class="field" id="repTrimWrap" style="display:none;">
+          <label>Trimestre</label>
+          <select id="repTrimestre"><option value="1">T1</option><option value="2">T2</option><option value="3">T3</option><option value="4">T4</option></select>
+        </div>
+        <div class="field" id="repTrimAnneeWrap" style="display:none;"><label>Année</label><input type="number" id="repTrimAnnee" value="2026" min="2000" max="2100"></div>
+        <div class="field" id="repAnneeWrap" style="display:none;"><label>Année</label><input type="number" id="repAnnee" value="2026" min="2000" max="2100"></div>
+        <div class="field"><button class="btn btn-primary" id="genRapportBtn">🔄 Générer</button></div>
+      </div>
+      <h3>➕ Ajouter une formation / animation</h3>
+      <div class="form-grid" style="grid-template-columns:2fr 1fr auto;align-items:end;">
+        <div class="field"><label>Intitulé</label><input type="text" id="formationNom" placeholder="Ex : Atelier smartphone débutant"></div>
+        <div class="field"><label>Date</label><input type="date" id="formationDate"></div>
+        <div class="field"><button class="btn btn-green" id="addFormationBtn" type="button">Ajouter</button></div>
+      </div>
+      <div id="formationsList" style="margin-top:14px;"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="printBtn">🖨️ Imprimer / PDF</button>
+        <button class="btn btn-green" id="excelBtn">📥 Générer le fichier Excel</button>
+      </div>
+    </div>
+
+    <div class="card" id="rapportContent">
+      <h2 id="rapportTitre">📄 Rapport</h2>
+      <div class="stat-cards" id="rapportCards"></div>
+      <div class="chart-row">
+        <div>
+          <h3>Répartition par type d'activité</h3>
+          <div class="bars" id="rapportTypeBars"></div>
+        </div>
+        <div>
+          <h3>Répartition par sexe</h3>
+          <div class="donut-wrap">
+            <div class="donut" id="rapportDonut"></div>
+            <div class="legend" id="rapportLegend"></div>
+          </div>
+        </div>
+      </div>
+      <h3 style="margin-top:18px;">Formations / animations de la période</h3>
+      <div id="rapportFormations"></div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 5 : AGENDA DU MOIS ================= -->
+  <div id="tab-agenda" class="tab-content">
+    <div class="card no-print">
+      <h2>🗓️ Agenda du mois</h2>
+      <div class="ag-toolbar">
+        <div class="ag-nav">
+          <button class="btn btn-secondary btn-small" id="agPrev" type="button">◀</button>
+          <div class="field"><label>Mois</label><input type="month" id="agMois"></div>
+          <button class="btn btn-secondary btn-small" id="agNext" type="button">▶</button>
+        </div>
+        <div class="field" style="flex:1;min-width:220px;"><label>Sous-titre de l'agenda</label><input type="text" id="agSousTitre" placeholder="Ex : Animations &amp; formations de l'EPN"></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn btn-secondary" id="agImgBtn" type="button">🖼️ Changer l'image d'en-tête</button>
+        <button class="btn btn-secondary" id="agImgReset" type="button">↩️ Image par défaut</button>
+        <input type="file" id="agImgInput" accept="image/*" style="display:none;">
+        <button class="btn btn-primary" id="agPdfBtn" type="button">📄 Exporter en PDF</button>
+        <button class="btn btn-green" id="agMailBtn" type="button">📧 Envoyer par mail</button>
+      </div>
+    </div>
+
+    <div class="card no-print">
+      <h3 id="agFormTitle">➕ Ajouter une animation / formation</h3>
+      <input type="hidden" id="agId">
+      <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end;">
+        <div class="field"><label>Type</label>
+          <select id="agType"><option value="animation">🎉 Animation</option><option value="formation">🎓 Formation</option></select>
+        </div>
+        <div class="field" style="grid-column:span 2;"><label>Intitulé</label><input type="text" id="agNom" placeholder="Ex : Atelier smartphone débutant"></div>
+        <div class="field"><label>Date</label><input type="date" id="agDate"></div>
+        <div class="field"><label>Début</label><input type="time" id="agDebut"></div>
+        <div class="field"><label>Fin</label><input type="time" id="agFin"></div>
+      </div>
+      <div class="field" style="margin-top:14px;"><label>Commentaire (facultatif)</label><textarea id="agCom" placeholder="Lieu, public visé, matériel à apporter, inscription..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-green" id="agSaveBtn" type="button">➕ Ajouter à l'agenda</button>
+        <button class="btn btn-secondary" id="agCancelBtn" type="button" style="display:none;">Annuler la modification</button>
+      </div>
+    </div>
+
+    <div id="agendaSheet">
+      <div class="ag-banner" id="agBanner">
+        <div class="ag-banner-txt"><h1 id="agTitre">Agenda</h1><p id="agSub"></p></div>
+      </div>
+      <div class="ag-body">
+        <div class="ag-cal" id="agCal"></div>
+        <div class="ag-list">
+          <h3>📋 Détail des activités</h3>
+          <div id="agList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale d'envoi par mail -->
+  <div class="modal-back no-print" id="mailModal">
+    <div class="modal-box">
+      <div class="modal-head"><h2>📧 Envoyer l'agenda par mail</h2><button class="modal-x" id="mailClose" type="button">×</button></div>
+      <div class="modal-body">
+        <div class="search-wrap" style="margin-bottom:0;"><input type="text" id="ctSearch" placeholder="Rechercher un contact..."></div>
+        <div class="ct-tools">
+          <button class="btn btn-secondary btn-small" id="ctAll" type="button">Tout sélectionner</button>
+          <button class="btn btn-secondary btn-small" id="ctNone" type="button">Tout désélectionner</button>
+          <span class="ct-count" id="ctCount">0 sélectionné</span>
+        </div>
+        <div class="ct-list" id="ctList"></div>
+        <div class="field"><label>Autres adresses (séparées par une virgule)</label><input type="text" id="mailExtra" placeholder="ex : jean@exemple.be, marie@exemple.be"></div>
+        <div class="field"><label>📨 Cci pour Publiwin <small style="font-weight:700;color:var(--text3);">(toutes les adresses, prêtes à coller dans le champ Cci)</small></label>
+          <textarea id="pwBcc" rows="3" readonly style="font-size:.82rem;"></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px;">
+            <label style="font-weight:800;font-size:.82rem;">Séparateur :</label>
+            <select id="pwSep" style="padding:6px 8px;border-radius:8px;border:1px solid var(--border2);">
+              <option value="; ">point-virgule ( ; )</option>
+              <option value=", ">virgule ( , )</option>
+              <option value="\n">un par ligne</option>
+            </select>
+            <button class="btn btn-secondary btn-small" id="pwCopyBcc" type="button">📋 Copier le Cci</button>
+            <button class="btn btn-secondary btn-small" id="pwCopyMsg" type="button">📋 Copier objet + message</button>
+          </div>
+        </div>
+        <div class="field"><label>Objet</label><input type="text" id="mailSubject"></div>
+        <div class="field"><label>Message</label><textarea id="mailBody" rows="6"></textarea></div>
+        <p style="margin-top:10px;color:var(--text3);font-weight:700;font-size:.82rem;">Le PDF est téléchargé automatiquement : pense à le joindre au mail (une page web ne peut pas joindre un fichier toute seule). Les destinataires sont mis en copie cachée (Cci).<br><b>Publiwin</b> : le bouton vert télécharge le PDF et copie les adresses (Cci) ; il suffit ensuite de les coller dans Publiwin.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" id="mailCopy" type="button">📋 Copier les adresses</button>
+        <button class="btn btn-secondary" id="mailShare" type="button" style="display:none;">📤 Partager avec le PDF</button>
+        <button class="btn btn-green" id="pwSend" type="button">📨 Préparer pour Publiwin</button>
+        <button class="btn btn-primary" id="mailSend" type="button">📧 Ouvrir ma messagerie</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     STOCKAGE
+     ========================================================= */
+  var persons = JSON.parse(localStorage.getItem("epn_persons") || "[]");
+  var pointages = JSON.parse(localStorage.getItem("epn_pointages") || "[]");
+  var formations = JSON.parse(localStorage.getItem("epn_formations") || "[]");
+
+  function savePersons() { localStorage.setItem("epn_persons", JSON.stringify(persons)); }
+  function savePointages() { localStorage.setItem("epn_pointages", JSON.stringify(pointages)); }
+  function saveFormations() { localStorage.setItem("epn_formations", JSON.stringify(formations)); }
+
+  /* =========================================================
+     EXPORT / IMPORT JSON (sauvegarde complète)
+     ========================================================= */
+  function exportAllToJson() {
+    var payload = {
+      app: "presences_epn",
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      persons: persons,
+      pointages: pointages,
+      formations: formations,
+      agenda: {
+        sousTitre: localStorage.getItem("epn_agenda_sub") || "",
+        image: localStorage.getItem("epn_agenda_img") || ""
+      }
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var stamp = todayISO();
+    a.href = url;
+    a.download = "presences_epn_sauvegarde_" + stamp + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // réglages de l'agenda (image d'en-tête + sous-titre) ; en fusion, on ne touche pas à ce qui existe déjà
+  function restoreAgendaSettings(ag, replaceAll) {
+    if (!ag) return;
+    try {
+      if (ag.sousTitre && (replaceAll || !localStorage.getItem("epn_agenda_sub"))) {
+        localStorage.setItem("epn_agenda_sub", ag.sousTitre);
+        document.getElementById("agSousTitre").value = ag.sousTitre;
+      }
+      if (ag.image && (replaceAll || !localStorage.getItem("epn_agenda_img"))) localStorage.setItem("epn_agenda_img", ag.image);
+    } catch (err) {}
+  }
+
+  function importAllFromJson(file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data;
+      try {
+        data = JSON.parse(e.target.result);
+      } catch (err) {
+        alert("Fichier JSON invalide.");
+        return;
+      }
+      if (!data || !Array.isArray(data.persons) || !Array.isArray(data.pointages)) {
+        alert("Ce fichier ne semble pas être une sauvegarde valide de cette application.");
+        return;
+      }
+      var mode = confirm(
+        "Importer ce fichier va REMPLACER toutes les données actuelles (personnes, pointages, formations).\n\n" +
+        "OK = remplacer tout\nAnnuler = fusionner avec les données existantes (sans doublons d'ID)"
+      );
+      if (mode) {
+        persons = data.persons || [];
+        pointages = data.pointages || [];
+        formations = data.formations || [];
+        restoreAgendaSettings(data.agenda, true);
+      } else {
+        var existingPersonIds = {};
+        persons.forEach(function (p) { existingPersonIds[p.id] = true; });
+        (data.persons || []).forEach(function (p) { if (!existingPersonIds[p.id]) persons.push(p); });
+
+        var existingPointageIds = {};
+        pointages.forEach(function (p) { existingPointageIds[p.id] = true; });
+        (data.pointages || []).forEach(function (p) { if (!existingPointageIds[p.id]) pointages.push(p); });
+
+        var existingFormationIds = {};
+        formations.forEach(function (f) { existingFormationIds[f.id || (f.nom + f.date)] = true; });
+        (data.formations || []).forEach(function (f) {
+          var key = f.id || (f.nom + f.date);
+          if (!existingFormationIds[key]) formations.push(f);
+        });
+        restoreAgendaSettings(data.agenda, false);
+      }
+      savePersons(); savePointages(); saveFormations();
+      renderList(); renderToday(); renderFormationsManager(); renderAgenda();
+      try { calcStats(); } catch (err) {}
+      if (currentReportRange) genererRapport();
+      alert("Import terminé : " + persons.length + " personnes, " + pointages.length + " pointages, " + formations.length + " formations / animations.");
+    };
+    reader.readAsText(file);
+  }
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  var TYPES = ["AI", "AC", "FO", "RE", "RL"];
+  var TYPE_COLORS = { AI:"#2a7fd4", AC:"#5aad2e", FO:"#e8a800", RE:"#c0392b", RL:"#7c3aed" };
+  var SEXE_COLORS = { M:"#2a7fd4", F:"#e0629a", NP:"#7a98b8" };
+
+  /* =========================================================
+     OUTILS DATE / AGE / JOURS FERIES BELGES
+     ========================================================= */
+  function fmtDate(d) {
+    var y = d.getFullYear(), m = ("0" + (d.getMonth() + 1)).slice(-2), day = ("0" + d.getDate()).slice(-2);
+    return y + "-" + m + "-" + day;
+  }
+  function parseISO(s) { return new Date(s + "T00:00:00"); }
+  function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; }
+  function todayISO() { return fmtDate(new Date()); }
+
+  function easterSunday(year) {
+    var a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4,
+        f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30,
+        i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7,
+        m = Math.floor((a + 11 * h + 22 * l) / 451), month = Math.floor((h + l - 7 * m + 114) / 31),
+        day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+  }
+  var holidayCache = {};
+  function belgianHolidays(year) {
+    if (holidayCache[year]) return holidayCache[year];
+    var easter = easterSunday(year);
+    var list = [
+      fmtDate(new Date(year, 0, 1)),
+      fmtDate(addDays(easter, 1)),
+      fmtDate(new Date(year, 4, 1)),
+      fmtDate(addDays(easter, 39)),
+      fmtDate(addDays(easter, 50)),
+      fmtDate(new Date(year, 6, 21)),
+      fmtDate(new Date(year, 7, 15)),
+      fmtDate(new Date(year, 10, 1)),
+      fmtDate(new Date(year, 10, 11)),
+      fmtDate(new Date(year, 11, 25))
+    ];
+    holidayCache[year] = list;
+    return list;
+  }
+  function isOpeningDay(iso) {
+    var d = parseISO(iso);
+    var dow = d.getDay();
+    if (dow === 0 || dow === 6) return false;
+    if (belgianHolidays(d.getFullYear()).indexOf(iso) !== -1) return false;
+    return true;
+  }
+  function countOpeningDays(startISO, endISO) {
+    var start = parseISO(startISO), end = parseISO(endISO), count = 0;
+    for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (isOpeningDay(fmtDate(d))) count++;
+    }
+    return count;
+  }
+  function calcAge(naissanceISO, refISO) {
+    if (!naissanceISO) return null;
+    var b = parseISO(naissanceISO);
+    var r = refISO ? parseISO(refISO) : new Date();
+    var age = r.getFullYear() - b.getFullYear();
+    var mDiff = r.getMonth() - b.getMonth();
+    if (mDiff < 0 || (mDiff === 0 && r.getDate() < b.getDate())) age--;
+    return age;
+  }
+  function normalizeStr(s) {
+    return (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
+  function isFlemallois(localite) { return normalizeStr(localite).indexOf("flemalle") !== -1; }
+
+  /* =========================================================
+     PERIODES
+     ========================================================= */
+  function periodRange(gran, opts) {
+    if (gran === "jour") {
+      return { start: opts.jour, end: opts.jour, label: "Journée du " + opts.jour };
+    }
+    if (gran === "mois") {
+      var parts = opts.mois.split("-"); var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
+      var start = fmtDate(new Date(y, m - 1, 1));
+      var end = fmtDate(new Date(y, m, 0));
+      var moisNoms = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+      return { start: start, end: end, label: moisNoms[m - 1] + " " + y };
+    }
+    if (gran === "trimestre") {
+      var t = parseInt(opts.trimestre, 10), yy = parseInt(opts.annee, 10);
+      var startMonth = (t - 1) * 3;
+      var start2 = fmtDate(new Date(yy, startMonth, 1));
+      var end2 = fmtDate(new Date(yy, startMonth + 3, 0));
+      return { start: start2, end: end2, label: "T" + t + " " + yy };
+    }
+    if (gran === "annee") {
+      var yr = parseInt(opts.annee, 10);
+      return { start: fmtDate(new Date(yr, 0, 1)), end: fmtDate(new Date(yr, 11, 31)), label: "Année " + yr };
+    }
+  }
+
+  function pointagesInRange(start, end) {
+    return pointages.filter(function (p) { return p.date >= start && p.date <= end; });
+  }
+
+  function computeStats(start, end) {
+    var pts = pointagesInRange(start, end);
+    var byType = { AI:0, AC:0, FO:0, RE:0, RL:0 };
+    var ageSum = 0, ageCount = 0;
+    var uniquePersonIds = {};
+    var joursAvecVisite = {};
+    pts.forEach(function (p) {
+      if (byType.hasOwnProperty(p.type)) byType[p.type]++;
+      joursAvecVisite[p.date] = true;
+      var person = persons.filter(function (pp) { return pp.id === p.personId; })[0];
+      if (person) {
+        uniquePersonIds[person.id] = true;
+        var age = calcAge(person.naissance, p.date);
+        if (age !== null && !isNaN(age)) { ageSum += age; ageCount++; }
+      }
+    });
+    // Sexe et Flémallois(es) : comptés une seule fois par personne unique,
+    // pas une fois par visite (une même personne qui revient ne doit pas gonfler ces totaux)
+    var femmes = 0, hommes = 0, np = 0, flemallois = 0;
+    Object.keys(uniquePersonIds).forEach(function (pid) {
+      var person = persons.filter(function (pp) { return pp.id === pid; })[0];
+      if (!person) return;
+      if (person.sexe === "F") femmes++; else if (person.sexe === "M") hommes++; else np++;
+      if (isFlemallois(person.localite)) flemallois++;
+    });
+    var joursOuverture = countOpeningDays(start, end);
+    var joursSansVisite = 0;
+    var dStart = parseISO(start), dEnd = parseISO(end);
+    for (var d = new Date(dStart); d <= dEnd; d.setDate(d.getDate() + 1)) {
+      var iso = fmtDate(d);
+      if (isOpeningDay(iso) && !joursAvecVisite[iso]) joursSansVisite++;
+    }
+    return {
+      total: pts.length,
+      uniques: Object.keys(uniquePersonIds).length,
+      femmes: femmes, hommes: hommes, np: np,
+      ageMoyen: ageCount ? (ageSum / ageCount).toFixed(1) : "—",
+      byType: byType,
+      joursOuverture: joursOuverture,
+      joursSansVisite: joursSansVisite,
+      flemallois: flemallois,
+      pointagesDetail: pts
+    };
+  }
+
+  /* =========================================================
+     GRAPHIQUES (sans librairie)
+     ========================================================= */
+  function renderBars(container, dataObj, colorMap) {
+    var max = 0;
+    Object.keys(dataObj).forEach(function (k) { if (dataObj[k] > max) max = dataObj[k]; });
+    if (max === 0) max = 1;
+    var html = "";
+    Object.keys(dataObj).forEach(function (k) {
+      var h = Math.round((dataObj[k] / max) * 100);
+      html += '<div class="bar-col"><div class="bar-fill" style="height:' + Math.max(h, 3) + '%;background:linear-gradient(180deg,' + colorMap[k] + 'cc,' + colorMap[k] + ');"><span class="bv">' + dataObj[k] + '</span></div><div class="bar-lbl">' + k + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderDonut(donutEl, legendEl, dataObj, colorMap) {
+    var total = 0;
+    Object.keys(dataObj).forEach(function (k) { total += dataObj[k]; });
+    if (total === 0) {
+      donutEl.style.background = "#e2eefb";
+      legendEl.innerHTML = '<div class="legend-item">Aucune donnée</div>';
+      return;
+    }
+    var acc = 0, stops = [];
+    Object.keys(dataObj).forEach(function (k) {
+      if (dataObj[k] <= 0) return;
+      var start = (acc / total) * 360;
+      acc += dataObj[k];
+      var end = (acc / total) * 360;
+      stops.push(colorMap[k] + " " + start + "deg " + end + "deg");
+    });
+    donutEl.style.background = "conic-gradient(" + stops.join(",") + ")";
+    var legendHtml = "";
+    Object.keys(dataObj).forEach(function (k) {
+      var pct = total ? Math.round((dataObj[k] / total) * 100) : 0;
+      legendHtml += '<div class="legend-item"><span class="legend-dot" style="background:' + colorMap[k] + ';"></span>' + labelSexe(k) + ' : ' + dataObj[k] + ' (' + pct + '%)</div>';
+    });
+    legendEl.innerHTML = legendHtml;
+  }
+
+  function labelSexe(k) { return k === "M" ? "Hommes" : (k === "F" ? "Femmes" : "Non précisé"); }
+
+  /* =========================================================
+     ONGLETS
+     ========================================================= */
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".tab-content").forEach(function (c) { c.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      if (btn.dataset.tab === "tab-list") renderList();
+      if (btn.dataset.tab === "tab-stats") calcStats();
+      if (btn.dataset.tab === "tab-agenda") renderAgenda();
+    });
+  });
+
+  /* =========================================================
+     ONGLET 1 : FORMULAIRE
+     ========================================================= */
+  var elNom = document.getElementById("nom"), elPrenom = document.getElementById("prenom"),
+      elEmail = document.getElementById("email"), elTel = document.getElementById("telephone"),
+      elNaissance = document.getElementById("naissance"), elAdresse = document.getElementById("adresse"),
+      elLocalite = document.getElementById("localite"), elDateJour = document.getElementById("dateJour"),
+      elType = document.getElementById("typeActivite"), elPersonId = document.getElementById("personId"),
+      elAgeReadout = document.getElementById("ageReadout"), elDoPointage = document.getElementById("doPointage"),
+      elFormTitle = document.getElementById("formTitle");
+
+  elDateJour.value = todayISO();
+
+  function updateAgeReadout() {
+    var age = calcAge(elNaissance.value, elDateJour.value || todayISO());
+    elAgeReadout.textContent = (age === null || isNaN(age)) ? "—" : age + " ans";
+  }
+  elNaissance.addEventListener("change", updateAgeReadout);
+  elDateJour.addEventListener("change", updateAgeReadout);
+
+  function setSexe(val) {
+    document.querySelectorAll('input[name="sexe"]').forEach(function (r) { r.checked = (r.value === val); });
+  }
+  function getSexe() {
+    var r = document.querySelector('input[name="sexe"]:checked');
+    return r ? r.value : "NP";
+  }
+
+  function resetForm() {
+    elPersonId.value = "";
+    document.getElementById("personForm").reset();
+    setSexe("M");
+    elDateJour.value = todayISO();
+    elDoPointage.checked = true;
+    updateAgeReadout();
+    elFormTitle.textContent = "➕ Nouvelle fiche / Pointage";
+    document.getElementById("searchPerson").value = "";
+  }
+  document.getElementById("resetFormBtn").addEventListener("click", resetForm);
+
+  function loadPersonIntoForm(p) {
+    elPersonId.value = p.id;
+    elNom.value = p.nom || ""; elPrenom.value = p.prenom || "";
+    elEmail.value = p.email || ""; elTel.value = p.telephone || "";
+    elNaissance.value = p.naissance || ""; elAdresse.value = p.adresse || "";
+    elLocalite.value = p.localite || ""; setSexe(p.sexe || "NP");
+    updateAgeReadout();
+    elFormTitle.textContent = "✏️ Fiche de " + p.prenom + " " + p.nom;
+  }
+
+  var elSearch = document.getElementById("searchPerson"), elSugg = document.getElementById("suggestions");
+  elSearch.addEventListener("input", function () {
+    var q = normalizeStr(elSearch.value);
+    if (!q) { elSugg.classList.remove("show"); elSugg.innerHTML = ""; return; }
+    var matches = persons.filter(function (p) {
+      return normalizeStr(p.nom).indexOf(q) !== -1 || normalizeStr(p.prenom).indexOf(q) !== -1 ||
+             normalizeStr(p.email).indexOf(q) !== -1 || normalizeStr(p.telephone).indexOf(q) !== -1;
+    }).slice(0, 12);
+    if (!matches.length) {
+      elSugg.innerHTML = '<div class="suggestion-item">Aucun résultat — une nouvelle fiche sera créée</div>';
+      elSugg.classList.add("show");
+      return;
+    }
+    elSugg.innerHTML = matches.map(function (p) {
+      return '<div class="suggestion-item" data-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+             '<span>' + p.prenom + " " + p.nom +
+             '<small>' + (p.email || "") + (p.localite ? " — " + p.localite : "") + '</small></span>' +
+             '<button type="button" class="btn btn-green btn-small" data-point="' + p.id + '" style="flex-shrink:0;">✅ Pointer</button></div>';
+    }).join("");
+    elSugg.classList.add("show");
+  });
+  /* pointage rapide depuis la recherche (sans passer par le formulaire) */
+  function quickPoint(id) {
+    var p = persons.filter(function (pp) { return pp.id === id; })[0];
+    if (!p) return;
+    var date = elDateJour.value || todayISO(), type = elType.value;
+    var already = pointages.some(function (x) { return x.personId === id && x.date === date && x.type === type; });
+    if (already && !confirm(p.prenom + " " + p.nom + " est déjà pointé(e) (" + type + ") à cette date.\nPointer une 2e fois ?")) return;
+    pointages.push({ id: uid(), personId: id, date: date, type: type });
+    savePointages();
+    renderToday();
+    elSugg.classList.remove("show"); elSugg.innerHTML = "";
+    elSearch.value = "";
+    var m = document.getElementById("searchMsg");
+    m.innerHTML = '<div class="msg msg-success">✅ ' + esc(p.prenom + " " + p.nom) + " pointé(e) (" + esc(type) + ").</div>";
+    setTimeout(function () { m.innerHTML = ""; }, 3000);
+  }
+  elSugg.addEventListener("click", function (e) {
+    var pb = e.target.closest("[data-point]");
+    if (pb) { e.stopPropagation(); quickPoint(pb.dataset.point); return; }
+    var item = e.target.closest(".suggestion-item");
+    if (!item || !item.dataset.id) return;
+    var p = persons.filter(function (pp) { return pp.id === item.dataset.id; })[0];
+    if (p) { loadPersonIntoForm(p); elSearch.value = p.prenom + " " + p.nom; }
+    elSugg.classList.remove("show");
+  });
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".search-wrap")) elSugg.classList.remove("show");
+  });
+
+  document.getElementById("personForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var id = elPersonId.value;
+    var data = {
+      nom: elNom.value.trim(), prenom: elPrenom.value.trim(), email: elEmail.value.trim(),
+      telephone: elTel.value.trim(), naissance: elNaissance.value, adresse: elAdresse.value.trim(),
+      localite: elLocalite.value.trim(), sexe: getSexe()
+    };
+    if (id) {
+      var idx = persons.findIndex(function (p) { return p.id === id; });
+      if (idx !== -1) persons[idx] = Object.assign({ id: id }, data);
+    } else {
+      id = uid();
+      data.id = id;
+      persons.push(data);
+    }
+    savePersons();
+
+    if (elDoPointage.checked) {
+      pointages.push({ id: uid(), personId: id, date: elDateJour.value || todayISO(), type: elType.value });
+      savePointages();
+    }
+
+    var msg = document.getElementById("formMsg");
+    msg.innerHTML = '<div class="msg msg-success">✅ Fiche enregistrée' + (elDoPointage.checked ? " et pointage ajouté." : ".") + '</div>';
+    setTimeout(function () { msg.innerHTML = ""; }, 3000);
+
+    renderToday();
+    resetForm();
+  });
+
+  function renderToday() {
+    var date = elDateJour.value || todayISO();
+    var pts = pointages.filter(function (p) { return p.date === date; })
+      .sort(function (a, b) { return (b.id > a.id) ? 1 : -1; });
+    var body = document.getElementById("todayBody");
+    if (!pts.length) {
+      body.innerHTML = "";
+      document.getElementById("todayEmpty").style.display = "block";
+      return;
+    }
+    document.getElementById("todayEmpty").style.display = "none";
+    body.innerHTML = pts.map(function (p) {
+      var person = persons.filter(function (pp) { return pp.id === p.personId; })[0] || {};
+      var age = calcAge(person.naissance, p.date);
+      return "<tr><td>" + (person.nom || "?") + "</td><td>" + (person.prenom || "?") + "</td>" +
+        '<td><span class="badge badge-' + (person.sexe || "NP") + '">' + (person.sexe || "NP") + "</span></td>" +
+        "<td>" + (age === null ? "—" : age) + "</td><td>" + (person.localite || "—") + "</td>" +
+        '<td><span class="badge badge-type">' + p.type + "</span></td><td>—</td></tr>";
+    }).join("");
+  }
+  elDateJour.addEventListener("change", renderToday);
+  updateAgeReadout();
+  renderToday();
+
+  /* =========================================================
+     ONGLET 3 : LISTE
+     ========================================================= */
+  function renderList() {
+    var q = normalizeStr(document.getElementById("listSearch").value);
+    var body = document.getElementById("listBody");
+    var filtered = persons.filter(function (p) {
+      if (!q) return true;
+      return normalizeStr(p.nom).indexOf(q) !== -1 || normalizeStr(p.prenom).indexOf(q) !== -1 ||
+             normalizeStr(p.email).indexOf(q) !== -1 || normalizeStr(p.localite).indexOf(q) !== -1;
+    }).sort(function (a, b) { return (a.nom || "").localeCompare(b.nom || ""); });
+
+    if (!filtered.length) {
+      body.innerHTML = "";
+      document.getElementById("listEmpty").style.display = "block";
+      return;
+    }
+    document.getElementById("listEmpty").style.display = "none";
+    body.innerHTML = filtered.map(function (p) {
+      var age = calcAge(p.naissance);
+      var visites = pointages.filter(function (pt) { return pt.personId === p.id; }).length;
+      return "<tr><td>" + (p.nom || "") + "</td><td>" + (p.prenom || "") + "</td><td>" + (p.email || "—") + "</td>" +
+        "<td>" + (p.telephone || "—") + "</td><td>" + (p.localite || "—") + "</td>" +
+        '<td><span class="badge badge-' + (p.sexe || "NP") + '">' + (p.sexe || "NP") + "</span></td>" +
+        "<td>" + (age === null ? "—" : age) + "</td><td>" + visites + "</td>" +
+        '<td><button class="btn btn-secondary btn-small" data-edit="' + p.id + '">✏️</button> ' +
+        '<button class="btn btn-danger btn-small" data-del="' + p.id + '">🗑️</button></td></tr>';
+    }).join("");
+  }
+  document.getElementById("listSearch").addEventListener("input", renderList);
+  document.getElementById("listBody").addEventListener("click", function (e) {
+    var editBtn = e.target.closest("[data-edit]"), delBtn = e.target.closest("[data-del]");
+    if (editBtn) {
+      var p = persons.filter(function (pp) { return pp.id === editBtn.dataset.edit; })[0];
+      if (p) {
+        loadPersonIntoForm(p);
+        elDoPointage.checked = false;
+        document.querySelector('.tab-btn[data-tab="tab-form"]').click();
+      }
+    }
+    if (delBtn) {
+      if (confirm("Supprimer cette personne et tous ses pointages ?")) {
+        var id = delBtn.dataset.del;
+        persons = persons.filter(function (p) { return p.id !== id; });
+        pointages = pointages.filter(function (p) { return p.personId !== id; });
+        savePersons(); savePointages();
+        renderList();
+      }
+    }
+  });
+
+  document.getElementById("exportJsonBtn").addEventListener("click", exportAllToJson);
+  document.getElementById("topExportBtn").addEventListener("click", exportAllToJson);
+  document.getElementById("topImportBtn").addEventListener("click", function () {
+    document.getElementById("importJsonInput").click();
+  });
+  document.getElementById("importJsonBtn").addEventListener("click", function () {
+    document.getElementById("importJsonInput").click();
+  });
+  document.getElementById("importJsonInput").addEventListener("change", function (e) {
+    var file = e.target.files[0];
+    if (file) importAllFromJson(file);
+    e.target.value = "";
+  });
+
+  /* =========================================================
+     ONGLET 2 : STATISTIQUES
+     ========================================================= */
+  function bindGranulariteToggle(prefix) {
+    var gran = document.getElementById(prefix + "Granulaire") || document.getElementById(prefix.slice(0,3) + "Granularite");
+  }
+  function setupGranulariteUI(selId, wraps) {
+    var sel = document.getElementById(selId);
+    sel.addEventListener("change", function () {
+      Object.keys(wraps).forEach(function (k) { document.getElementById(wraps[k]).style.display = "none"; });
+      document.getElementById(wraps[sel.value]).style.display = "flex";
+    });
+  }
+  setupGranulariteUI("statGranularite", { jour: "statJourWrap", mois: "statMoisWrap", trimestre: "statTrimWrap", annee: "statAnneeWrap" });
+  document.getElementById("statGranularite").addEventListener("change", function () {
+    document.getElementById("statTrimAnneeWrap").style.display = (this.value === "trimestre") ? "flex" : "none";
+  });
+  document.getElementById("statJour").value = todayISO();
+
+  function getStatPeriod() {
+    var gran = document.getElementById("statGranularite").value;
+    var opts = {
+      jour: document.getElementById("statJour").value || todayISO(),
+      mois: document.getElementById("statMois").value,
+      trimestre: document.getElementById("statTrimestre").value,
+      annee: (gran === "trimestre") ? document.getElementById("statTrimAnnee").value : document.getElementById("statAnnee").value
+    };
+    return periodRange(gran, opts);
+  }
+
+  function calcStats() {
+    var range = getStatPeriod();
+    if (!range || !range.start) return;
+    var stats = computeStats(range.start, range.end);
+    var cards = document.getElementById("statCards");
+    cards.innerHTML =
+      statCard(stats.total, "Total pointages") +
+      statCard(stats.uniques, "Personnes uniques") +
+      statCard(stats.femmes, "Femmes") +
+      statCard(stats.hommes, "Hommes") +
+      statCard(stats.np, "Non précisé") +
+      statCard(stats.ageMoyen, "Âge moyen") +
+      statCard(stats.joursOuverture, "Jours d'ouverture") +
+      statCard(stats.joursSansVisite, "Jours sans visite") +
+      statCard(stats.flemallois, "Flémallois(es)");
+
+    renderBars(document.getElementById("typeBars"), stats.byType, TYPE_COLORS);
+    renderDonut(document.getElementById("sexeDonut"), document.getElementById("sexeLegend"),
+      { M: stats.hommes, F: stats.femmes, NP: stats.np }, SEXE_COLORS);
+
+    document.getElementById("statHistoTitle").textContent = "🗓️ Détail — " + range.label;
+    var body = document.getElementById("statHistoBody");
+    var sorted = stats.pointagesDetail.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (!sorted.length) {
+      body.innerHTML = "";
+      document.getElementById("statHistoEmpty").style.display = "block";
+    } else {
+      document.getElementById("statHistoEmpty").style.display = "none";
+      body.innerHTML = sorted.map(function (p) {
+        var person = persons.filter(function (pp) { return pp.id === p.personId; })[0] || {};
+        var age = calcAge(person.naissance, p.date);
+        return "<tr><td>" + p.date + "</td><td>" + (person.nom || "?") + "</td><td>" + (person.prenom || "?") + "</td>" +
+          '<td><span class="badge badge-' + (person.sexe || "NP") + '">' + (person.sexe || "NP") + "</span></td>" +
+          "<td>" + (age === null ? "—" : age) + "</td><td>" + (person.localite || "—") + "</td>" +
+          '<td><span class="badge badge-type">' + p.type + "</span></td></tr>";
+      }).join("");
+    }
+    return { range: range, stats: stats };
+  }
+  function statCard(val, lbl) {
+    return '<div class="stat-card"><div class="val">' + val + '</div><div class="lbl">' + lbl + '</div></div>';
+  }
+  document.getElementById("calcStatsBtn").addEventListener("click", calcStats);
+  calcStats();
+
+  /* =========================================================
+     ONGLET 4 : RAPPORTS
+     ========================================================= */
+  setupGranulariteUI("repGranularite", { jour: "repJourWrap", mois: "repMoisWrap", trimestre: "repTrimWrap", annee: "repAnneeWrap" });
+  document.getElementById("repGranularite").addEventListener("change", function () {
+    document.getElementById("repTrimAnneeWrap").style.display = (this.value === "trimestre") ? "flex" : "none";
+  });
+  document.getElementById("repJour").value = todayISO();
+
+  function getRepPeriod() {
+    var gran = document.getElementById("repGranularite").value;
+    var opts = {
+      jour: document.getElementById("repJour").value || todayISO(),
+      mois: document.getElementById("repMois").value,
+      trimestre: document.getElementById("repTrimestre").value,
+      annee: (gran === "trimestre") ? document.getElementById("repTrimAnnee").value : document.getElementById("repAnnee").value
+    };
+    return periodRange(gran, opts);
+  }
+
+  var currentReportRange = null;
+
+  function renderFormationsManager() {
+    var wrap = document.getElementById("formationsList");
+    if (!formations.length) { wrap.innerHTML = '<div class="empty-msg">Aucune formation ajoutée.</div>'; return; }
+    var sorted = formations.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    wrap.innerHTML = sorted.map(function (f) {
+      return '<div class="form-list-item"><div><strong>' + f.nom + '</strong><span>' + f.date + '</span></div>' +
+        '<button class="btn btn-danger btn-small" data-delform="' + f.id + '">🗑️</button></div>';
+    }).join("");
+  }
+  document.getElementById("addFormationBtn").addEventListener("click", function () {
+    var nom = document.getElementById("formationNom").value.trim();
+    var date = document.getElementById("formationDate").value;
+    if (!nom || !date) { alert("Merci d'indiquer un intitulé et une date."); return; }
+    formations.push({ id: uid(), nom: nom, date: date });
+    saveFormations();
+    document.getElementById("formationNom").value = "";
+    document.getElementById("formationDate").value = "";
+    renderFormationsManager();
+    if (currentReportRange) genererRapport();
+  });
+  document.getElementById("formationsList").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-delform]");
+    if (!btn) return;
+    formations = formations.filter(function (f) { return f.id !== btn.dataset.delform; });
+    saveFormations();
+    renderFormationsManager();
+    if (currentReportRange) genererRapport();
+  });
+  renderFormationsManager();
+
+  function genererRapport() {
+    var range = getRepPeriod();
+    if (!range || !range.start) return;
+    currentReportRange = range;
+    var stats = computeStats(range.start, range.end);
+
+    document.getElementById("rapportTitre").textContent = "📄 Rapport — " + range.label;
+    var cards = document.getElementById("rapportCards");
+    cards.innerHTML =
+      statCard(stats.total, "Total pointages") +
+      statCard(stats.uniques, "Personnes uniques") +
+      statCard(stats.femmes, "Femmes") +
+      statCard(stats.hommes, "Hommes") +
+      statCard(stats.np, "Non précisé") +
+      statCard(stats.ageMoyen, "Âge moyen") +
+      statCard(stats.joursOuverture, "Jours d'ouverture") +
+      statCard(stats.joursSansVisite, "Jours sans visite") +
+      statCard(stats.flemallois, "Flémallois(es)");
+
+    renderBars(document.getElementById("rapportTypeBars"), stats.byType, TYPE_COLORS);
+    renderDonut(document.getElementById("rapportDonut"), document.getElementById("rapportLegend"),
+      { M: stats.hommes, F: stats.femmes, NP: stats.np }, SEXE_COLORS);
+
+    var formsInRange = formations.filter(function (f) { return f.date >= range.start && f.date <= range.end; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var wrap = document.getElementById("rapportFormations");
+    if (!formsInRange.length) {
+      wrap.innerHTML = '<div class="empty-msg">Aucune formation / animation sur cette période.</div>';
+    } else {
+      wrap.innerHTML = formsInRange.map(function (f) {
+        return '<div class="form-list-item"><div><strong>' + f.nom + '</strong><span>' + f.date + '</span></div></div>';
+      }).join("");
+    }
+  }
+  document.getElementById("genRapportBtn").addEventListener("click", genererRapport);
+  genererRapport();
+
+  document.getElementById("printBtn").addEventListener("click", function () {
+    document.querySelectorAll(".tab-content").forEach(function (c) { c.classList.remove("print-active"); });
+    document.getElementById("tab-report").classList.add("print-active");
+    window.print();
+  });
+
+  /* =========================================================
+     EXPORT EXCEL — format "classeur EPN"
+     Feuille Résumé (année) + Trimestre1..4 (grille jour par jour
+     par personne), avec de vraies formules Excel (COUNTIF /
+     SUMPRODUCT, pas de formule matricielle Ctrl+Maj+Entrée) pour
+     que tout se recalcule automatiquement même sans l'appli, si
+     quelqu'un modifie une case à la main. Les onglets Contact,
+     Email et Agenda ne sont pas touchés : ils restent gérés par
+     Juju dans son classeur maître, il suffit d'y copier/coller
+     ces onglets.
+     ========================================================= */
+  var MOIS_NOMS_XL = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  var TYPE_LIST_XL = ["AI", "AC", "FO", "RE", "RL"];
+  var TYPE_LABELS_XL = { AI: "Accueil individuel", AC: "Accueil collectif", FO: "Formation", RE: "Recherche d'emploi", RL: "Recherche de logement" };
+  // en-têtes du bloc résumé (mêmes colonnes utilisées sur chaque feuille Trimestre et sur la feuille Résumé)
+  var SUM_HEADERS_XL = ["Mois / Total", "Total", "AI", "AC", "FO", "RE", "RL", "Âge moyen", "Femme", "Homme", "Non précisé", "Pers. uniques"];
+
+  function xlCol(idx) { return XLSX.utils.encode_col(idx); }
+  function personAgeToday(person) {
+    var a = calcAge(person.naissance, null);
+    return (a === null || isNaN(a)) ? "" : a;
+  }
+  function blankRow(n) { var r = []; for (var i = 0; i < n; i++) r.push(""); return r; }
+
+  // Calcule, pour une liste de pointages déjà filtrée sur une période, les
+  // agrégats utilisés à la fois pour remplir les cellules (valeur affichée
+  // tout de suite) ET pour construire la formule Excel équivalente.
+  function aggregatePeriod(pts, roster) {
+    var visitDaysSet = {}, byType = { AI: 0, AC: 0, FO: 0, RE: 0, RL: 0 };
+    var uniquePersons = {};
+    pts.forEach(function (p) {
+      visitDaysSet[p.personId + "|" + p.date] = true;
+      if (byType.hasOwnProperty(p.type)) byType[p.type]++;
+      uniquePersons[p.personId] = true;
+    });
+    var femme = 0, homme = 0, np = 0, ageSum = 0, ageCount = 0;
+    Object.keys(uniquePersons).forEach(function (pid) {
+      var person = roster.filter(function (pp) { return pp.id === pid; })[0];
+      if (!person) return;
+      if (person.sexe === "F") femme++; else if (person.sexe === "M") homme++; else np++;
+      var a = personAgeToday(person);
+      if (a !== "") { ageSum += a; ageCount++; }
+    });
+    return {
+      total: Object.keys(visitDaysSet).length,
+      byType: byType,
+      femme: femme, homme: homme, np: np,
+      ageMoyen: ageCount ? Math.round((ageSum / ageCount) * 10) / 10 : 0,
+      uniques: Object.keys(uniquePersons).length
+    };
+  }
+
+  function buildTrimestreSheet(year, quarter, roster) {
+    var startMonth = (quarter - 1) * 3;
+    var months = [startMonth, startMonth + 1, startMonth + 2];
+    var qStart = fmtDate(new Date(year, startMonth, 1));
+    var qEnd = fmtDate(new Date(year, startMonth + 3, 0));
+
+    var days = [];
+    var d1 = parseISO(qEnd);
+    for (var d = new Date(parseISO(qStart)); d <= d1; d.setDate(d.getDate() + 1)) days.push(fmtDate(d));
+
+    var FIXED_COLS = ["N°", "Nom", "Prénom", "E-mail", "Téléphone", "Adresse", "Localité", "Date de naissance", "Âge", "Genre", "Total présences trim."];
+    var dayColStart = FIXED_COLS.length;
+
+    var monthColBounds = months.map(function (m) {
+      var mStart = fmtDate(new Date(year, m, 1));
+      var mEnd = fmtDate(new Date(year, m + 1, 0));
+      var startIdx = -1, endIdx = -1;
+      days.forEach(function (dt, i) { if (dt >= mStart && dt <= mEnd) { if (startIdx === -1) startIdx = i; endIdx = i; } });
+      return { month: m, colStart: dayColStart + startIdx, colEnd: dayColStart + endIdx, dateStart: mStart, dateEnd: mEnd };
+    });
+
+    var helperColStart = dayColStart + days.length; // 3 colonnes "Visité <mois>" + 1 colonne "Visité ce trimestre"
+    var gapCol = helperColStart + 4;
+    var sumStart = gapCol + 1;
+
+    var lastRow = Math.max(5, 1 + roster.length);
+
+    var header = FIXED_COLS.concat(days.map(function (ds) { return parseISO(ds); }));
+    months.forEach(function (m) { header.push("Visité " + MOIS_NOMS_XL[m]); });
+    header.push("Visité ce trim.");
+    header.push("");
+    header = header.concat(["Résumé Trimestre " + quarter].concat(SUM_HEADERS_XL.slice(1)));
+
+    var qPts = pointagesInRange(qStart, qEnd);
+    var aoa = [header];
+    roster.forEach(function (person, idx) {
+      var row = [idx + 1, person.nom || "", person.prenom || "", person.email || "", person.telephone || "",
+        person.adresse || "", person.localite || "", person.naissance ? parseISO(person.naissance) : "",
+        personAgeToday(person), person.sexe || "NP", 0];
+      days.forEach(function (ds) {
+        if (!isOpeningDay(ds)) { row.push("Fermer"); return; }
+        var matches = qPts.filter(function (p) { return p.personId === person.id && p.date === ds; });
+        row.push(matches.length ? matches.map(function (m) { return m.type; }).join("+") : "");
+      });
+      months.forEach(function () { row.push(0); });
+      row.push("");
+      row = row.concat(blankRow(SUM_HEADERS_XL.length));
+      aoa.push(row);
+    });
+    while (aoa.length < lastRow + 1) aoa.push(blankRow(header.length));
+
+    var ws = XLSX.utils.aoa_to_sheet(aoa);
+    var colAge = xlCol(8), colGenre = xlCol(9), colTotal = xlCol(10), colNaiss = xlCol(7);
+
+    // Âge + Total présences par personne
+    roster.forEach(function (person, idx) {
+      var r = idx + 2;
+      var age = personAgeToday(person);
+      ws[colAge + r] = { t: "n", v: age === "" ? 0 : age, f: "IF(" + colNaiss + r + "=\"\",\"\",DATEDIF(" + colNaiss + r + ",TODAY(),\"Y\"))" };
+      var rangeAll = xlCol(dayColStart) + r + ":" + xlCol(dayColStart + days.length - 1) + r;
+      var visitDays = 0;
+      days.forEach(function (ds) {
+        if (isOpeningDay(ds) && qPts.some(function (p) { return p.personId === person.id && p.date === ds; })) visitDays++;
+      });
+      ws[colTotal + r] = { t: "n", v: visitDays, f: "SUMPRODUCT((" + rangeAll + "<>\"\")*(" + rangeAll + "<>\"Fermer\"))" };
+    });
+
+    // colonnes "Visité en <mois>" (1/0) par personne
+    var helperCols = [];
+    months.forEach(function (m, mi) {
+      var bounds = monthColBounds[mi];
+      var hc = xlCol(helperColStart + mi);
+      helperCols.push(hc);
+      roster.forEach(function (person, idx) {
+        var r = idx + 2;
+        var rangeRow = xlCol(bounds.colStart) + r + ":" + xlCol(bounds.colEnd) + r;
+        var visited = qPts.some(function (p) { return p.personId === person.id && p.date >= bounds.dateStart && p.date <= bounds.dateEnd; });
+        ws[hc + r] = { t: "n", v: visited ? 1 : 0, f: "IF(SUMPRODUCT((" + rangeRow + "<>\"\")*(" + rangeRow + "<>\"Fermer\"))>0,1,0)" };
+      });
+    });
+
+    // colonne "Visité ce trim." (1/0) = OR des 3 colonnes mensuelles — sert à dédoublonner
+    // les personnes qui reviennent sur plusieurs mois du même trimestre
+    var quarterHelperCol = xlCol(helperColStart + 3);
+    roster.forEach(function (person, idx) {
+      var r = idx + 2;
+      var visitedQ = qPts.some(function (p) { return p.personId === person.id; });
+      ws[quarterHelperCol + r] = { t: "n", v: visitedQ ? 1 : 0, f: "IF(SUM(" + helperCols[0] + r + ":" + helperCols[2] + r + ")>0,1,0)" };
+    });
+
+    // bloc résumé du trimestre (lignes 2 à 4 = mois, ligne 5 = total trimestre)
+    var monthAgg = [];
+    months.forEach(function (m, mi) {
+      var bounds = monthColBounds[mi];
+      var monthPts = pointagesInRange(bounds.dateStart, bounds.dateEnd);
+      var agg = aggregatePeriod(monthPts, roster);
+      monthAgg.push(agg);
+      var row = 2 + mi;
+      var rangeAll2D = xlCol(bounds.colStart) + "2:" + xlCol(bounds.colEnd) + lastRow;
+      var helperRangeAll = helperCols[mi] + "2:" + helperCols[mi] + lastRow;
+      var c = sumStart;
+      ws[xlCol(c) + row] = { t: "s", v: MOIS_NOMS_XL[m] };
+      ws[xlCol(c + 1) + row] = { t: "n", v: agg.total, f: "SUMPRODUCT((" + rangeAll2D + "<>\"\")*(" + rangeAll2D + "<>\"Fermer\"))" };
+      TYPE_LIST_XL.forEach(function (code, ti) {
+        ws[xlCol(c + 2 + ti) + row] = { t: "n", v: agg.byType[code], f: "COUNTIF(" + rangeAll2D + ",\"*" + code + "*\")" };
+      });
+      ws[xlCol(c + 7) + row] = { t: "n", v: agg.ageMoyen, f: "IFERROR(SUMPRODUCT($" + colAge + "$2:$" + colAge + "$" + lastRow + "*" + helperRangeAll + ")/SUM(" + helperRangeAll + "),0)" };
+      ws[xlCol(c + 8) + row] = { t: "n", v: agg.femme, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"F\")*(" + helperRangeAll + "))" };
+      ws[xlCol(c + 9) + row] = { t: "n", v: agg.homme, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"M\")*(" + helperRangeAll + "))" };
+      ws[xlCol(c + 10) + row] = { t: "n", v: agg.np, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"NP\")*(" + helperRangeAll + "))" };
+      ws[xlCol(c + 11) + row] = { t: "n", v: agg.uniques, f: "SUM(" + helperRangeAll + ")" };
+    });
+
+    var qPtsAgg = aggregatePeriod(qPts, roster);
+    var totRow = 5, c2 = sumStart;
+    var qHelperRangeAll = quarterHelperCol + "2:" + quarterHelperCol + lastRow;
+    ws[xlCol(c2) + totRow] = { t: "s", v: "Total trimestre" };
+    // Total / AI / AC / FO / RE / RL : ce sont des compteurs de visites (additifs),
+    // la somme des 3 mois est donc correcte.
+    var totColVals = [
+      { off: 1, val: qPtsAgg.total },
+      { off: 2, val: qPtsAgg.byType.AI },
+      { off: 3, val: qPtsAgg.byType.AC },
+      { off: 4, val: qPtsAgg.byType.FO },
+      { off: 5, val: qPtsAgg.byType.RE },
+      { off: 6, val: qPtsAgg.byType.RL }
+    ];
+    totColVals.forEach(function (item) {
+      var letter = xlCol(c2 + item.off);
+      ws[letter + totRow] = { t: "n", v: item.val, f: "SUM(" + letter + "2:" + letter + "4)" };
+    });
+    // Femme / Homme / Non précisé / Âge moyen / Personnes uniques : ce sont des compteurs
+    // de PERSONNES, donc on dédoublonne via la colonne "Visité ce trim." plutôt que de
+    // sommer les 3 mois (sinon une même personne revenue 2 mois de suite serait comptée 2 fois).
+    var ageLetter = xlCol(c2 + 7);
+    ws[xlCol(c2 + 8) + totRow] = { t: "n", v: qPtsAgg.femme, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"F\")*(" + qHelperRangeAll + "))" };
+    ws[xlCol(c2 + 9) + totRow] = { t: "n", v: qPtsAgg.homme, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"M\")*(" + qHelperRangeAll + "))" };
+    ws[xlCol(c2 + 10) + totRow] = { t: "n", v: qPtsAgg.np, f: "SUMPRODUCT(($" + colGenre + "$2:$" + colGenre + "$" + lastRow + "=\"NP\")*(" + qHelperRangeAll + "))" };
+    ws[xlCol(c2 + 11) + totRow] = { t: "n", v: qPtsAgg.uniques, f: "SUM(" + qHelperRangeAll + ")" };
+    ws[ageLetter + totRow] = { t: "n", v: qPtsAgg.ageMoyen, f: "IFERROR(SUMPRODUCT($" + colAge + "$2:$" + colAge + "$" + lastRow + "*" + qHelperRangeAll + ")/SUM(" + qHelperRangeAll + "),0)" };
+
+    ws["!cols"] = FIXED_COLS.map(function () { return { wch: 14 }; }).concat(days.map(function () { return { wch: 7 }; }));
+    var maxCol = sumStart + 11;
+    ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: lastRow - 1, c: maxCol } });
+
+    return { ws: ws, sumStart: sumStart, lastRow: lastRow, monthAgg: monthAgg, quarterAgg: qPtsAgg, months: months, quarterHelperCol: quarterHelperCol, colAge: colAge, colGenre: colGenre };
+  }
+
+  function buildResumeSheet(year, trimestreMeta, roster) {
+    var rows = [
+      ["Résumé annuel des visites — " + year],
+      [],
+      ["Explications : AI = Accueil individuel, AC = Accueil collectif, FO = Formation, RE = Recherche d'emploi, RL = Recherche de logement."],
+      ["Chaque cellule d'un onglet Trimestre peut être modifiée à la main (code d'activité, ou vide si pas de visite) : tous les totaux se recalculent automatiquement."],
+      []
+    ];
+    rows.push(["Mois", "Total", "AI", "AC", "FO", "RE", "RL", "Âge moyen", "Femme", "Homme", "Non précisé", "Pers. uniques", "", "Détail annuel par personne (sert au calcul dédoublonné) →"]);
+    var firstDataRow = rows.length + 1;
+    for (var m = 0; m < 12; m++) { rows.push([MOIS_NOMS_XL[m], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]); }
+    for (var qq = 0; qq < 4; qq++) { rows.push(["Trimestre " + (qq + 1), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]); }
+    rows.push(["Total année", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    rows.push([]);
+    rows.push(["Animations / formations " + year]);
+    rows.push(["Libellé", "Date"]);
+    var formsYear = formations.filter(function (f) { return f.date && f.date.slice(0, 4) === String(year); })
+      .sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    if (!formsYear.length) rows.push(["(aucune animation encodée)", ""]);
+    formsYear.forEach(function (f) { rows.push([f.nom, parseISO(f.date)]); });
+
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+
+    for (var m2 = 0; m2 < 12; m2++) {
+      var q2 = Math.floor(m2 / 3);
+      var rowInQ = 2 + (m2 % 3);
+      var meta = trimestreMeta[q2];
+      var sheetName = "Trimestre" + (q2 + 1);
+      var r = firstDataRow + m2;
+      var agg = meta.monthAgg[m2 % 3];
+      var vals = [agg.total, agg.byType.AI, agg.byType.AC, agg.byType.FO, agg.byType.RE, agg.byType.RL, agg.ageMoyen, agg.femme, agg.homme, agg.np, agg.uniques];
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].forEach(function (c, i) {
+        var refLetter = xlCol(meta.sumStart + c);
+        ws[xlCol(c) + r] = { t: "n", v: vals[i], f: "'" + sheetName + "'!" + refLetter + rowInQ };
+      });
+    }
+
+    var quarterRowStart = firstDataRow + 12;
+    for (var qi = 0; qi < 4; qi++) {
+      var meta2 = trimestreMeta[qi];
+      var sheetName2 = "Trimestre" + (qi + 1);
+      var r2 = quarterRowStart + qi;
+      var vals2 = [meta2.quarterAgg.total, meta2.quarterAgg.byType.AI, meta2.quarterAgg.byType.AC, meta2.quarterAgg.byType.FO, meta2.quarterAgg.byType.RE, meta2.quarterAgg.byType.RL, meta2.quarterAgg.ageMoyen, meta2.quarterAgg.femme, meta2.quarterAgg.homme, meta2.quarterAgg.np, meta2.quarterAgg.uniques];
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].forEach(function (c, i) {
+        var refLetter = xlCol(meta2.sumStart + c);
+        ws[xlCol(c) + r2] = { t: "n", v: vals2[i], f: "'" + sheetName2 + "'!" + refLetter + "5" };
+      });
+    }
+
+    // ---- Tableau détail par personne (colonnes N à V), pour dédoublonner
+    // correctement Femme / Homme / Non précisé / Pers. uniques / Âge moyen
+    // au niveau ANNÉE (une personne venue au T1 et au T3 ne doit compter
+    // qu'une fois, pas deux) ----
+    var detailStart = 13; // colonne N (0-based)
+    var headerRow = 6;
+    ["Nom", "Prénom", "Genre", "Visité T1", "Visité T2", "Visité T3", "Visité T4", "Visité cette année", "Âge"].forEach(function (h, i) {
+      ws[xlCol(detailStart + i) + headerRow] = { t: "s", v: h };
+    });
+    var firstDetailRow = firstDataRow;
+    roster.forEach(function (person, idx) {
+      var rTrim = idx + 2; // ligne de cette personne sur CHAQUE onglet Trimestre (même ordre partout)
+      var r3 = firstDetailRow + idx;
+      ws[xlCol(detailStart) + r3] = { t: "s", v: person.nom || "" };
+      ws[xlCol(detailStart + 1) + r3] = { t: "s", v: person.prenom || "" };
+      ws[xlCol(detailStart + 2) + r3] = { t: "s", v: person.sexe || "NP", f: "'Trimestre1'!" + trimestreMeta[0].colGenre + rTrim };
+      var tFlags = [];
+      [0, 1, 2, 3].forEach(function (qi2) {
+        var meta4 = trimestreMeta[qi2];
+        var visited = pointagesInRange(fmtDate(new Date(year, qi2 * 3, 1)), fmtDate(new Date(year, qi2 * 3 + 3, 0)))
+          .some(function (p) { return p.personId === person.id; });
+        var colLetter = xlCol(detailStart + 3 + qi2);
+        ws[colLetter + r3] = { t: "n", v: visited ? 1 : 0, f: "'Trimestre" + (qi2 + 1) + "'!" + meta4.quarterHelperCol + rTrim };
+        tFlags.push(colLetter);
+      });
+      var yearPts = pointagesInRange(fmtDate(new Date(year, 0, 1)), fmtDate(new Date(year, 11, 31)));
+      var visitedYear = yearPts.some(function (p) { return p.personId === person.id; });
+      ws[xlCol(detailStart + 7) + r3] = { t: "n", v: visitedYear ? 1 : 0, f: "IF(SUM(" + tFlags[0] + r3 + ":" + tFlags[3] + r3 + ")>0,1,0)" };
+      ws[xlCol(detailStart + 8) + r3] = { t: "n", v: personAgeToday(person) === "" ? 0 : personAgeToday(person), f: "'Trimestre1'!" + trimestreMeta[0].colAge + rTrim };
+    });
+    var lastDetailRow = firstDetailRow + roster.length - 1;
+    var genreCol = xlCol(detailStart + 2), yearFlagCol = xlCol(detailStart + 7), ageCol = xlCol(detailStart + 8);
+    var genreRange = genreCol + firstDetailRow + ":" + genreCol + lastDetailRow;
+    var yearFlagRange = yearFlagCol + firstDetailRow + ":" + yearFlagCol + lastDetailRow;
+    var ageRange = ageCol + firstDetailRow + ":" + ageCol + lastDetailRow;
+
+    var yearRow = quarterRowStart + 4;
+    var yearPtsAll = pointagesInRange(fmtDate(new Date(year, 0, 1)), fmtDate(new Date(year, 11, 31)));
+    var yearAgg = aggregatePeriod(yearPtsAll, roster);
+    // Total / AI / AC / FO / RE / RL : compteurs de visites, additifs → somme des 4 trimestres
+    [1, 2, 3, 4, 5, 6].forEach(function (c) {
+      var letter = xlCol(c);
+      ws[letter + yearRow] = { t: "n", f: "SUM(" + letter + quarterRowStart + ":" + letter + (quarterRowStart + 3) + ")" };
+    });
+    ws[xlCol(1) + yearRow].v = yearAgg.total;
+    ws[xlCol(2) + yearRow].v = yearAgg.byType.AI;
+    ws[xlCol(3) + yearRow].v = yearAgg.byType.AC;
+    ws[xlCol(4) + yearRow].v = yearAgg.byType.FO;
+    ws[xlCol(5) + yearRow].v = yearAgg.byType.RE;
+    ws[xlCol(6) + yearRow].v = yearAgg.byType.RL;
+    // Femme / Homme / Non précisé / Âge moyen / Pers. uniques : dédoublonnés via le tableau détail
+    ws[xlCol(8) + yearRow] = { t: "n", v: yearAgg.femme, f: "SUMPRODUCT((" + genreRange + "=\"F\")*(" + yearFlagRange + "))" };
+    ws[xlCol(9) + yearRow] = { t: "n", v: yearAgg.homme, f: "SUMPRODUCT((" + genreRange + "=\"M\")*(" + yearFlagRange + "))" };
+    ws[xlCol(10) + yearRow] = { t: "n", v: yearAgg.np, f: "SUMPRODUCT((" + genreRange + "=\"NP\")*(" + yearFlagRange + "))" };
+    ws[xlCol(11) + yearRow] = { t: "n", v: yearAgg.uniques, f: "SUM(" + yearFlagRange + ")" };
+    ws[xlCol(7) + yearRow] = { t: "n", v: yearAgg.ageMoyen, f: "IFERROR(SUMPRODUCT(" + ageRange + "*" + yearFlagRange + ")/SUM(" + yearFlagRange + "),0)" };
+
+    ws["!cols"] = [{ wch: 22 }, { wch: 10 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 2 },
+      { wch: 16 }, { wch: 16 }, { wch: 8 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 14 }, { wch: 7 }];
+    var finalMaxRow = Math.max(rows.length, lastDetailRow);
+    var finalMaxCol = detailStart + 8; // colonne V
+    ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: finalMaxRow - 1, c: finalMaxCol } });
+    return ws;
+  }
+
+  function buildContactsSheet(roster) {
+    var headers = ["Nom", "Prénom", "Email", "Téléphone", "Date de naissance", "Âge", "Sexe", "Adresse", "Localité", "Nombre de visites"];
+    var sorted = roster.slice().sort(function (a, b) { return (a.nom || "").localeCompare(b.nom || "", "fr", { sensitivity: "base" }); });
+    var rows = [["Répertoire des contacts"], ["Trié automatiquement par nom"], [], headers];
+    sorted.forEach(function (p) {
+      var age = personAgeToday(p);
+      var nbVisites = pointages.filter(function (pt) { return pt.personId === p.id; }).length;
+      rows.push([
+        p.nom || "", p.prenom || "", p.email || "", p.telephone || "",
+        p.naissance ? parseISO(p.naissance) : "", age === "" ? "" : age,
+        p.sexe || "NP", p.adresse || "", p.localite || "", nbVisites
+      ]);
+    });
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    var headerRowExcel = 4; // ligne Excel (1-based) de la ligne d'en-têtes
+    var headerRowIdx0 = 3;  // même ligne, en index 0-based
+    // Format la colonne "Date de naissance" (E) en date
+    for (var r = headerRowExcel + 1; r <= headerRowExcel + sorted.length; r++) {
+      var cellRef = "E" + r;
+      if (ws[cellRef] && ws[cellRef].v instanceof Date) { ws[cellRef].t = "d"; ws[cellRef].z = "dd/mm/yyyy"; }
+    }
+    ws["!cols"] = [{ wch: 18 }, { wch: 16 }, { wch: 26 }, { wch: 14 }, { wch: 16 }, { wch: 7 }, { wch: 8 }, { wch: 24 }, { wch: 16 }, { wch: 14 }];
+    ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length - 1, c: headers.length - 1 } });
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: headerRowIdx0, c: 0 }, e: { r: rows.length - 1, c: headers.length - 1 } }) };
+    return ws;
+  }
+
+  document.getElementById("excelBtn").addEventListener("click", function () {
+    var range = currentReportRange || getRepPeriod();
+    if (!range) { alert("Merci de générer un rapport d'abord."); return; }
+    var year = parseInt(range.start.slice(0, 4), 10);
+
+    if (!persons.length) { alert("Aucune personne encodée pour le moment."); return; }
+
+    var wb = XLSX.utils.book_new();
+    var sharedRoster = persons.slice().sort(function (a, b) { return (a.nom || "").localeCompare(b.nom || ""); });
+    var trimestreMeta = [];
+    var trimestreSheets = [];
+    [1, 2, 3, 4].forEach(function (q) {
+      var built = buildTrimestreSheet(year, q, sharedRoster);
+      trimestreMeta.push(built);
+      trimestreSheets.push(built.ws);
+    });
+
+    var wsResume = buildResumeSheet(year, trimestreMeta, sharedRoster);
+    XLSX.utils.book_append_sheet(wb, wsResume, "Résumé");
+    trimestreSheets.forEach(function (ws, i) {
+      XLSX.utils.book_append_sheet(wb, ws, "Trimestre" + (i + 1));
+    });
+    var wsContacts = buildContactsSheet(sharedRoster);
+    XLSX.utils.book_append_sheet(wb, wsContacts, "Contacts");
+
+    XLSX.writeFile(wb, "presences_epn_" + year + ".xlsx");
+  });
+
+
+  /* =========================================================
+     ONGLET 5 : AGENDA DU MOIS
+     Réutilise la liste "formations" (id, nom, date) en y ajoutant
+     type, debut, fin, commentaire : l'ancien format reste compatible
+     (sauvegarde JSON et Excel inchangés).
+     ========================================================= */
+  var MOIS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  var JOURS_FR = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  var elAgMois = document.getElementById("agMois");
+  elAgMois.value = todayISO().slice(0, 7);
+  document.getElementById("agSousTitre").value = localStorage.getItem("epn_agenda_sub") || "Animations & formations";
+
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function fmtLong(iso) {
+    var d = parseISO(iso), j = ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."][d.getDay()];
+    return j + " " + d.getDate() + " " + MOIS_FR[d.getMonth()];
+  }
+  function agTypeOf(f) { return f.type === "animation" ? "animation" : "formation"; }
+  function agHeure(f) { return f.debut ? (f.debut + (f.fin ? "–" + f.fin : "")) : ""; }
+
+  /* image d'en-tête : image par défaut dessinée en SVG, ou image choisie */
+  function defaultBanner() {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a7fd4"/><stop offset=".55" stop-color="#5ba3e8"/><stop offset="1" stop-color="#5aad2e"/></linearGradient></defs>' +
+      '<rect width="1200" height="300" fill="url(#g)"/>' +
+      '<circle cx="1050" cy="60" r="150" fill="#ffd84d" opacity=".35"/><circle cx="150" cy="290" r="170" fill="#fff" opacity=".18"/>' +
+      '<circle cx="720" cy="40" r="70" fill="#fff" opacity=".15"/><circle cx="430" cy="270" r="90" fill="#ffd84d" opacity=".25"/>' +
+      '<rect x="880" y="120" width="190" height="120" rx="14" fill="#fff" opacity=".28"/><rect x="900" y="140" width="150" height="80" rx="8" fill="#fff" opacity=".35"/>' +
+      '<rect x="940" y="246" width="70" height="12" rx="6" fill="#fff" opacity=".35"/></svg>';
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+  function currentBanner() { return localStorage.getItem("epn_agenda_img") || defaultBanner(); }
+
+  function agMonthInfo() {
+    var v = elAgMois.value || todayISO().slice(0, 7);
+    var y = parseInt(v.slice(0, 4), 10), m = parseInt(v.slice(5, 7), 10) - 1;
+    return { y: y, m: m, start: fmtDate(new Date(y, m, 1)), end: fmtDate(new Date(y, m + 1, 0)) };
+  }
+  function agEntries() {
+    var mi = agMonthInfo();
+    return formations.filter(function (f) { return f.date >= mi.start && f.date <= mi.end; })
+      .sort(function (a, b) { return a.date === b.date ? (a.debut || "").localeCompare(b.debut || "") : (a.date < b.date ? -1 : 1); });
+  }
+
+  function renderAgenda() {
+    var mi = agMonthInfo(), entries = agEntries(), today = todayISO();
+    document.getElementById("agBanner").style.backgroundImage = 'url("' + currentBanner() + '")';
+    document.getElementById("agTitre").textContent = "Agenda de " + MOIS_FR[mi.m] + " " + mi.y;
+    document.getElementById("agSub").textContent = document.getElementById("agSousTitre").value;
+
+    var html = JOURS_FR.map(function (j) { return '<div class="ag-dow">' + j + '</div>'; }).join("");
+    var first = new Date(mi.y, mi.m, 1), lead = (first.getDay() + 6) % 7, nbDays = new Date(mi.y, mi.m + 1, 0).getDate();
+    for (var i = 0; i < lead; i++) html += '<div class="ag-cell out"></div>';
+    for (var d = 1; d <= nbDays; d++) {
+      var iso = fmtDate(new Date(mi.y, mi.m, d));
+      var cls = "ag-cell" + (isOpeningDay(iso) ? "" : " off") + (iso === today ? " today" : "");
+      var chips = entries.filter(function (f) { return f.date === iso; }).map(function (f) {
+        return '<span class="ag-chip ' + agTypeOf(f) + '">' + esc((f.debut ? f.debut + " " : "") + f.nom) + '</span>';
+      }).join("");
+      html += '<div class="' + cls + '"><div class="dn">' + d + '</div>' + chips + '</div>';
+    }
+    document.getElementById("agCal").innerHTML = html;
+
+    var list = document.getElementById("agList");
+    if (!entries.length) { list.innerHTML = '<div class="empty-msg">Aucune activité prévue ce mois-ci.</div>'; return; }
+    list.innerHTML = entries.map(function (f) {
+      var t = agTypeOf(f);
+      return '<div class="ag-item ' + t + '"><div class="ag-date">' + esc(fmtLong(f.date)) + (agHeure(f) ? '<br><span style="color:var(--text2)">' + esc(agHeure(f)) + '</span>' : '') + '</div>' +
+        '<div style="flex:1"><div class="ag-tt"><span class="ag-tag ' + t + '">' + (t === "animation" ? "Animation" : "Formation") + '</span>' + esc(f.nom) + '</div>' +
+        (f.commentaire ? '<div class="ag-cm">' + esc(f.commentaire) + '</div>' : '') + '</div>' +
+        '<div class="ag-actions no-print"><button class="btn btn-secondary btn-small" data-agedit="' + esc(f.id) + '" type="button">✏️</button>' +
+        '<button class="btn btn-danger btn-small" data-agdel="' + esc(f.id) + '" type="button">🗑️</button></div></div>';
+    }).join("");
+  }
+
+  function agResetForm() {
+    document.getElementById("agId").value = "";
+    document.getElementById("agNom").value = "";
+    document.getElementById("agDebut").value = "";
+    document.getElementById("agFin").value = "";
+    document.getElementById("agCom").value = "";
+    document.getElementById("agFormTitle").textContent = "➕ Ajouter une animation / formation";
+    document.getElementById("agSaveBtn").textContent = "➕ Ajouter à l'agenda";
+    document.getElementById("agCancelBtn").style.display = "none";
+  }
+  function agRefreshAll() { renderAgenda(); renderFormationsManager(); if (currentReportRange) genererRapport(); }
+
+  document.getElementById("agSaveBtn").addEventListener("click", function () {
+    var nom = document.getElementById("agNom").value.trim(), date = document.getElementById("agDate").value;
+    if (!nom || !date) { alert("Merci d'indiquer un intitulé et une date."); return; }
+    var data = {
+      nom: nom, date: date, type: document.getElementById("agType").value,
+      debut: document.getElementById("agDebut").value, fin: document.getElementById("agFin").value,
+      commentaire: document.getElementById("agCom").value.trim()
+    };
+    var id = document.getElementById("agId").value;
+    if (id) {
+      var idx = formations.findIndex(function (f) { return f.id === id; });
+      if (idx !== -1) formations[idx] = Object.assign({ id: id }, data);
+    } else {
+      data.id = uid();
+      formations.push(data);
+    }
+    saveFormations();
+    elAgMois.value = date.slice(0, 7);   // on affiche le mois de l'activité
+    agResetForm();
+    agRefreshAll();
+  });
+  document.getElementById("agCancelBtn").addEventListener("click", agResetForm);
+
+  document.getElementById("agList").addEventListener("click", function (e) {
+    var ed = e.target.closest("[data-agedit]"), del = e.target.closest("[data-agdel]");
+    if (ed) {
+      var f = formations.filter(function (x) { return x.id === ed.dataset.agedit; })[0];
+      if (!f) return;
+      document.getElementById("agId").value = f.id;
+      document.getElementById("agType").value = agTypeOf(f);
+      document.getElementById("agNom").value = f.nom;
+      document.getElementById("agDate").value = f.date;
+      document.getElementById("agDebut").value = f.debut || "";
+      document.getElementById("agFin").value = f.fin || "";
+      document.getElementById("agCom").value = f.commentaire || "";
+      document.getElementById("agFormTitle").textContent = "✏️ Modifier l'activité";
+      document.getElementById("agSaveBtn").textContent = "💾 Enregistrer les modifications";
+      document.getElementById("agCancelBtn").style.display = "";
+      document.getElementById("agNom").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    if (del && confirm("Supprimer cette activité ?")) {
+      formations = formations.filter(function (x) { return x.id !== del.dataset.agdel; });
+      saveFormations();
+      agResetForm();
+      agRefreshAll();
+    }
+  });
+
+  /* navigation de mois */
+  function agShift(n) {
+    var mi = agMonthInfo(), d = new Date(mi.y, mi.m + n, 1);
+    elAgMois.value = fmtDate(d).slice(0, 7);
+    renderAgenda();
+  }
+  document.getElementById("agPrev").addEventListener("click", function () { agShift(-1); });
+  document.getElementById("agNext").addEventListener("click", function () { agShift(1); });
+  elAgMois.addEventListener("change", renderAgenda);
+  document.getElementById("agSousTitre").addEventListener("input", function () {
+    localStorage.setItem("epn_agenda_sub", this.value);
+    renderAgenda();
+  });
+
+  /* image d'en-tête (réduite à 1400 px max pour ne pas saturer le stockage du navigateur) */
+  document.getElementById("agImgBtn").addEventListener("click", function () { document.getElementById("agImgInput").click(); });
+  document.getElementById("agImgInput").addEventListener("change", function (e) {
+    var file = e.target.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var img = new Image();
+      img.onload = function () {
+        var maxW = 1400, ratio = Math.min(1, maxW / img.width);
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.width * ratio); c.height = Math.round(img.height * ratio);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        try { localStorage.setItem("epn_agenda_img", c.toDataURL("image/jpeg", 0.85)); }
+        catch (err) { alert("Image trop lourde pour être mémorisée par le navigateur. Essaie avec une image plus petite."); }
+        renderAgenda();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  });
+  document.getElementById("agImgReset").addEventListener("click", function () {
+    localStorage.removeItem("epn_agenda_img");
+    renderAgenda();
+  });
+
+  /* export PDF : capture de la feuille d'agenda puis découpe en pages A4 */
+  function buildAgendaPdf() {
+    if (typeof html2canvas === "undefined" || !window.jspdf) {
+      return Promise.reject(new Error("Les bibliothèques PDF ne sont pas chargées (connexion internet nécessaire)."));
+    }
+    renderAgenda();
+    var sheet = document.getElementById("agendaSheet");
+    sheet.classList.add("ag-pdfmode");
+    return html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true }).then(function (canvas) {
+      sheet.classList.remove("ag-pdfmode");
+      var pdf = new window.jspdf.jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      var pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 8;
+      var imgW = pw - margin * 2, pageH = ph - margin * 2;
+      var pxPerMm = canvas.width / imgW, sliceH = Math.floor(pageH * pxPerMm), y = 0, first = true;
+      while (y < canvas.height) {
+        var h = Math.min(sliceH, canvas.height - y);
+        var part = document.createElement("canvas");
+        part.width = canvas.width; part.height = h;
+        part.getContext("2d").drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+        if (!first) pdf.addPage();
+        pdf.addImage(part.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h / pxPerMm);
+        first = false; y += h;
+      }
+      return pdf;
+    }).catch(function (err) { sheet.classList.remove("ag-pdfmode"); throw err; });
+  }
+  function agPdfName() { var mi = agMonthInfo(); return "agenda_epn_" + mi.y + "-" + ("0" + (mi.m + 1)).slice(-2) + ".pdf"; }
+  function triggerDownload(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  }
+  document.getElementById("agPdfBtn").addEventListener("click", function () {
+    var btn = this; btn.disabled = true;
+    buildAgendaPdf().then(function (pdf) { pdf.save(agPdfName()); })
+      .catch(function (err) { alert("Export PDF impossible : " + err.message); })
+      .then(function () { btn.disabled = false; });
+  });
+
+  /* modale d'envoi par mail */
+  var mailChecked = {};
+  var elMailModal = document.getElementById("mailModal");
+
+  function contactsWithEmail() {
+    return persons.filter(function (p) { return p.email && /\S+@\S+/.test(p.email); })
+      .sort(function (a, b) { return (a.nom || "").localeCompare(b.nom || "", "fr", { sensitivity: "base" }); });
+  }
+  function renderContacts() {
+    var q = normalizeStr(document.getElementById("ctSearch").value);
+    var all = contactsWithEmail();
+    var shown = all.filter(function (p) { return !q || normalizeStr((p.nom || "") + " " + (p.prenom || "") + " " + p.email).indexOf(q) !== -1; });
+    var list = document.getElementById("ctList");
+    if (!all.length) list.innerHTML = '<div class="empty-msg">Aucun contact avec une adresse email. Tu peux saisir des adresses à la main ci-dessous.</div>';
+    else if (!shown.length) list.innerHTML = '<div class="empty-msg">Aucun résultat.</div>';
+    else list.innerHTML = shown.map(function (p) {
+      return '<label class="ct-row"><input type="checkbox" data-ct="' + esc(p.id) + '"' + (mailChecked[p.id] ? " checked" : "") + '>' +
+        '<span>' + esc((p.prenom || "") + " " + (p.nom || "")) + '<small>' + esc(p.email) + '</small></span></label>';
+    }).join("");
+    updateCtCount();
+  }
+  function updateCtCount() {
+    var n = Object.keys(mailChecked).filter(function (k) { return mailChecked[k]; }).length;
+    document.getElementById("ctCount").textContent = n + " sélectionné" + (n > 1 ? "s" : "");
+    updatePwBcc();
+  }
+  /* Publiwin : liste Cci prête à coller */
+  function pwSepValue() { var v = document.getElementById("pwSep").value; return v === "\\n" ? "\n" : v; }
+  function pwBccText() { return selectedEmails().join(pwSepValue()); }
+  function updatePwBcc() { document.getElementById("pwBcc").value = pwBccText(); }
+  function copyText(txt, okMsg) {
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      if (ok) alert(okMsg); else window.prompt("Copie manuellement (Ctrl+C) :", txt);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { alert(okMsg); }, fallback);
+    else fallback();
+  }
+  function selectedEmails() {
+    var out = [];
+    contactsWithEmail().forEach(function (p) { if (mailChecked[p.id]) out.push(p.email.trim()); });
+    document.getElementById("mailExtra").value.split(/[,;\s]+/).forEach(function (e) { if (/\S+@\S+/.test(e)) out.push(e); });
+    return out.filter(function (e, i) { return out.indexOf(e) === i; });
+  }
+  function agTextList() {
+    return agEntries().map(function (f) {
+      return "• " + fmtLong(f.date) + (agHeure(f) ? " (" + agHeure(f) + ")" : "") + " — " + f.nom + (f.commentaire ? " : " + f.commentaire.replace(/\s*\n\s*/g, " ") : "");
+    }).join("\n");
+  }
+  function defaultMailBody() {
+    var mi = agMonthInfo();
+    return "Bonjour,\n\nVous trouverez ci-joint l'agenda de " + MOIS_FR[mi.m] + " " + mi.y + " de l'EPN.\n\nÀ bientôt !";
+  }
+  document.getElementById("agMailBtn").addEventListener("click", function () {
+    var mi = agMonthInfo();
+    mailChecked = {};
+    document.getElementById("ctSearch").value = "";
+    document.getElementById("mailExtra").value = "";
+    document.getElementById("mailSubject").value = "Agenda de " + MOIS_FR[mi.m] + " " + mi.y + " — EPN";
+    document.getElementById("mailBody").value = defaultMailBody();
+    document.getElementById("mailShare").style.display = (navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.pdf", { type: "application/pdf" })] })) ? "" : "none";
+    renderContacts();
+    elMailModal.classList.add("show");
+  });
+  function closeMail() { elMailModal.classList.remove("show"); }
+  document.getElementById("mailClose").addEventListener("click", closeMail);
+  elMailModal.addEventListener("click", function (e) { if (e.target === elMailModal) closeMail(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMail(); });
+  document.getElementById("ctSearch").addEventListener("input", renderContacts);
+  document.getElementById("ctList").addEventListener("change", function (e) {
+    var cb = e.target.closest("[data-ct]"); if (!cb) return;
+    mailChecked[cb.dataset.ct] = cb.checked; updateCtCount();
+  });
+  document.getElementById("ctAll").addEventListener("click", function () {
+    var q = normalizeStr(document.getElementById("ctSearch").value);
+    contactsWithEmail().forEach(function (p) {
+      if (!q || normalizeStr((p.nom || "") + " " + (p.prenom || "") + " " + p.email).indexOf(q) !== -1) mailChecked[p.id] = true;
+    });
+    renderContacts();
+  });
+  document.getElementById("ctNone").addEventListener("click", function () { mailChecked = {}; renderContacts(); });
+
+  document.getElementById("mailExtra").addEventListener("input", updatePwBcc);
+  document.getElementById("pwSep").addEventListener("change", updatePwBcc);
+  document.getElementById("pwCopyBcc").addEventListener("click", function () {
+    var list = selectedEmails();
+    if (!list.length) { alert("Aucune adresse sélectionnée."); return; }
+    copyText(pwBccText(), list.length + " adresse(s) copiée(s) : colle-les dans le champ Cci de Publiwin.");
+  });
+  document.getElementById("pwCopyMsg").addEventListener("click", function () {
+    copyText(document.getElementById("mailSubject").value + "\n\n" + document.getElementById("mailBody").value + "\n\n" + agTextList(), "Objet + message copiés.");
+  });
+  document.getElementById("pwSend").addEventListener("click", function () {
+    var list = selectedEmails();
+    if (!list.length) { alert("Sélectionne au moins un contact (ou saisis une adresse)."); return; }
+    var btn = this; btn.disabled = true;
+    buildAgendaPdf().then(function (pdf) {
+      pdf.save(agPdfName());
+      copyText(pwBccText(), list.length + " adresse(s) copiée(s) dans le presse-papier.\n\n1. Ouvre Publiwin et crée un nouveau message\n2. Colle (Ctrl+V) dans le champ Cci\n3. Joins le PDF « " + agPdfName() + " » (dossier Téléchargements)\n\nL'objet et le message sont dans la fenêtre (bouton « Copier objet + message »).");
+    }).catch(function (err) { alert("Export PDF impossible : " + err.message); })
+      .then(function () { btn.disabled = false; });
+  });
+  document.getElementById("mailCopy").addEventListener("click", function () {
+    var list = selectedEmails();
+    if (!list.length) { alert("Aucune adresse sélectionnée."); return; }
+    var txt = list.join("; ");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { alert(list.length + " adresse(s) copiée(s)."); });
+    else window.prompt("Copie les adresses :", txt);
+  });
+  document.getElementById("mailSend").addEventListener("click", function () {
+    var list = selectedEmails();
+    if (!list.length) { alert("Sélectionne au moins un contact (ou saisis une adresse)."); return; }
+    var btn = this; btn.disabled = true;
+    buildAgendaPdf().then(function (pdf) {
+      pdf.save(agPdfName());   // téléchargé pour pouvoir le joindre
+      var subject = document.getElementById("mailSubject").value;
+      var body = document.getElementById("mailBody").value;
+      var url = "mailto:?bcc=" + encodeURIComponent(list.join(";")) + "&subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body + "\n\n" + agTextList());
+      if (url.length > 1900) url = "mailto:?bcc=" + encodeURIComponent(list.join(";")) + "&subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      window.location.href = url;
+      alert("Le PDF « " + agPdfName() + " » a été téléchargé : joins-le au mail qui vient de s'ouvrir.");
+    }).catch(function (err) { alert("Export PDF impossible : " + err.message); })
+      .then(function () { btn.disabled = false; });
+  });
+  document.getElementById("mailShare").addEventListener("click", function () {
+    var btn = this; btn.disabled = true;
+    buildAgendaPdf().then(function (pdf) {
+      var file = new File([pdf.output("blob")], agPdfName(), { type: "application/pdf" });
+      return navigator.share({ files: [file], title: document.getElementById("mailSubject").value, text: document.getElementById("mailBody").value });
+    }).catch(function (err) { if (err && err.name !== "AbortError") alert("Partage impossible : " + err.message); })
+      .then(function () { btn.disabled = false; });
+  });
+
+  renderAgenda();
+
+})();
+</script>
+</body>
+</html>

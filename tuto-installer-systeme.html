@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installer un système : Windows & Linux</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;font-family:Segoe UI,system-ui,sans-serif}
+body{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--card2:#273449;--text:#f1f5f9;--muted:#94a3b8;--accent:#3b82f6;--border:#ffffff22;--hdr:#1e293bcc;--btntxt:#fff;
+ background:linear-gradient(135deg,var(--bg),var(--bg2)) fixed;color:var(--text);display:flex;flex-direction:column}
+body[data-theme=light]{--bg:#eef2f7;--bg2:#dbe4f0;--card:#fff;--card2:#f1f5f9;--text:#1e293b;--muted:#64748b;--border:#cbd5e1;--hdr:#ffffffcc}
+body[data-theme=t07]{--bg:#b7d0f0;--bg2:#8fb2e0;--card:#eef4fd;--card2:#cfe0f7;--text:#15428b;--muted:#4a6fa5;--accent:#ffc83d;--border:#7ea4d8;--hdr:#d4e4fa;--btntxt:#15428b}
+body[data-theme=violet]{--bg:#1e1b4b;--bg2:#3b0764;--card:#312e81;--card2:#4338ca;--text:#f5f3ff;--muted:#c4b5fd;--accent:#a855f7;--border:#ffffff2a;--hdr:#1e1b4bcc}
+body[data-theme=vert]{--bg:#052e16;--bg2:#14532d;--card:#166534;--card2:#15803d;--text:#f0fdf4;--muted:#86efac;--accent:#22c55e;--border:#ffffff2a;--hdr:#052e16cc;--btntxt:#052e16}
+body[data-theme=sunset]{--bg:#431407;--bg2:#7c2d12;--card:#9a3412;--card2:#c2410c;--text:#fff7ed;--muted:#fdba74;--accent:#f97316;--border:#ffffff2a;--hdr:#431407cc}
+#top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:var(--hdr);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+#top h1{font-size:19px;flex:1;min-width:180px}
+.btn{background:var(--accent);color:var(--btntxt);border:1px solid transparent;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:14px;font-family:inherit}
+.btn.g{background:var(--card2);color:var(--text);border-color:var(--border)}
+.btn.on{background:var(--accent);color:var(--btntxt)}
+.btn:hover:not(:disabled){filter:brightness(1.1)}.btn:disabled{opacity:.4;cursor:default}
+select.btn{padding:7px 8px}
+#bar{height:4px;background:var(--accent);width:0;transition:.3s}
+#main{display:flex;flex:1;min-height:0}
+#side{width:250px;flex-shrink:0;overflow:auto;padding:12px;background:var(--hdr);border-right:1px solid var(--border)}
+#nav{display:flex;flex-direction:column;gap:6px}
+#nav button{text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font:inherit;font-size:14px}
+#nav button:hover{background:var(--card2)}
+#nav button.on{background:var(--accent);color:var(--btntxt);border-color:transparent;font-weight:600}
+#content{flex:1;overflow:auto;padding:24px 18px 40px}
+.page{max-width:820px;margin:0 auto}
+.chap{display:none}.chap.show{display:block}
+body[data-os=win] .lin,body[data-os=lin] .win{display:none}
+h2{font-size:26px;margin-bottom:6px}
+.lead{color:var(--muted);margin-bottom:16px}
+p{line-height:1.6;margin:8px 0}
+.card,.note,.warn{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:12px 0;line-height:1.6;box-shadow:0 4px 14px #0002}
+.note{border-left:5px solid var(--accent)}.warn{border-left:5px solid #f59e0b}
+ul.l{padding-left:20px;line-height:1.7}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;background:var(--card);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:12px;padding:12px 14px 12px 54px;margin:12px 0;line-height:1.6}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:12px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--btntxt);display:flex;align-items:center;justify-content:center;font-weight:700}
+code,kbd{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-family:Consolas,monospace;font-size:.92em}
+pre{position:relative;background:#0b1220;color:#e2e8f0;border-radius:10px;padding:12px 14px;margin:10px 0;overflow:auto;font-size:13.5px;line-height:1.5}
+pre code{background:none;border:0;padding:0;color:inherit}
+.cp{position:absolute;top:6px;right:6px;border:0;border-radius:6px;background:#ffffff22;color:#fff;padding:3px 8px;cursor:pointer;font-size:12px}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--card);border-radius:12px;overflow:hidden;font-size:14.5px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:var(--card2)}
+details{background:var(--card);border:1px solid var(--border);border-radius:12px;margin:10px 0;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+.q{margin:16px 0}.q b{display:block;margin-bottom:8px}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font:inherit}
+.q button:hover{background:var(--card2)}
+.q button.ok{background:#16a34a;color:#fff}.q button.ko{background:#dc2626;color:#fff}
+.q small{display:block;color:var(--muted);margin-top:4px}
+.pn{display:flex;justify-content:space-between;gap:10px;max-width:820px;margin:26px auto 0}
+@media(max-width:760px){#main{flex-direction:column}#side{width:auto;border-right:0;border-bottom:1px solid var(--border)}#nav{flex-direction:row;overflow:auto}#nav button{white-space:nowrap}}
+
+/* ===== Export PDF : toutes les pages d'un coup ===== */
+#ptitle{display:none}
+@page{size:A4;margin:14mm}
+@media print{
+ body,body[data-theme]{--bg:#fff;--bg2:#fff;--card:#fff;--card2:#f1f5f9;--text:#1e293b;--muted:#64748b;--border:#cbd5e1;--accent:#3b82f6;--btntxt:#fff;
+  background:#fff!important;color:#1e293b;display:block!important;height:auto!important;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+ html{height:auto!important}
+ #top,#bar,#side,.pn,.cp,#c-quiz{display:none!important}
+ #ptitle{display:block;font-size:24px;font-weight:700;margin:0 0 4px}
+ #main{display:block!important}
+ #content{overflow:visible!important;padding:0!important}
+ .page{max-width:none}
+ .chap,.chap.show{display:block!important;break-before:page}
+ .chap:first-of-type{break-before:auto}
+ body[data-os=win] .chap[data-os=lin],body[data-os=lin] .chap[data-os=win]{display:none!important}
+ .card,.note,.warn,.steps li,details,pre,tr,.q{box-shadow:none;break-inside:avoid}
+ h2,summary{break-after:avoid}
+ pre{white-space:pre-wrap;word-break:break-word;overflow:visible}
+}
+</style>
+</head>
+<body data-theme="dark" data-os="win">
+<div id="top">
+  <h1>🖥️ Installer un système : Windows &amp; Linux</h1>
+  <button class="btn g" data-os-btn="win">🪟 Windows 11</button>
+  <button class="btn g" data-os-btn="lin">🐧 Linux Mint</button>
+  <select class="btn g" id="theme" title="Choisir le thème">
+    <option value="dark">🌙 Sombre</option><option value="light">☀️ Clair</option>
+    <option value="t07">🪟 Office 2007 (bleu glass)</option><option value="violet">🔮 Violet</option>
+    <option value="vert">🌿 Vert</option><option value="sunset">🌇 Coucher de soleil</option>
+  </select>
+  <button class="btn" id="pdf" title="Exporter tout le tuto en PDF">📄 PDF</button>
+</div>
+<div id="bar"></div>
+<div id="main">
+  <div id="side"><div id="nav"></div></div>
+  <div id="content"><div class="page">
+  <div id="ptitle">🖥️ Installer un système : Windows &amp; Linux</div>
+
+<section class="chap" id="c-intro" data-os="all" data-t="Avant de commencer" data-i="🎯">
+  <h2>🎯 Avant de commencer</h2>
+  <p class="lead">Ce tuto installe <b class="win">Windows 11 🪟</b><b class="lin">Linux Mint 🐧</b> pas à pas. Change de système avec les boutons en haut.</p>
+  <div class="card"><b>Ce qu'il te faut</b>
+    <ul class="l"><li>Une <b>clé USB bootable</b> avec l'ISO (voir le tuto « Clé USB bootable : Rufus &amp; Ventoy »)</li><li>Un PC branché sur secteur, avec une connexion Internet</li><li>Une sauvegarde de tes fichiers</li><li>Environ 45 minutes</li></ul></div>
+  <div class="card"><b>Deux façons d'installer</b>
+    <ul class="l"><li><b>Remplacer</b> l'ancien système : tout le disque est effacé.</li><li><b>Garder les deux</b> (double démarrage) : Windows et Linux sur le même PC. Voir le chapitre dédié.</li></ul></div>
+  <div class="warn">⚠️ Une installation qui efface le disque supprime <b>tous</b> tes fichiers. Sauvegarde avant.</div>
+</section>
+
+<section class="chap" id="c-prep" data-os="all" data-t="Préparer le PC" data-i="🧰">
+  <h2>🧰 Préparer le PC</h2>
+  <ol class="steps">
+    <li><b>Sauvegarde</b> tes documents, photos et favoris du navigateur sur un disque externe ou dans le cloud. Pense aussi à noter tes mots de passe et licences.</li>
+    <li><b>Vérifie que ton PC est assez puissant :</b>
+      <div class="win"><table><tr><th>Élément</th><th>Minimum pour Windows 11</th></tr><tr><td>Mémoire (RAM)</td><td>4 Go</td></tr><tr><td>Stockage</td><td>64 Go</td></tr><tr><td>Processeur</td><td>64 bits, 2 cœurs, 1 GHz</td></tr><tr><td>Sécurité</td><td>UEFI avec Secure Boot, puce TPM 2.0</td></tr></table>
+      <small>Pour voir si ton PC a un TPM : touches <kbd>Windows</kbd>+<kbd>R</kbd>, tape <code>tpm.msc</code>.</small></div>
+      <div class="lin"><table><tr><th>Élément</th><th>Minimum pour Linux Mint</th></tr><tr><td>Mémoire (RAM)</td><td>2 Go (4 Go conseillés)</td></tr><tr><td>Stockage</td><td>20 Go</td></tr><tr><td>Écran</td><td>1024 × 768</td></tr></table>
+      <small>Linux Mint tourne très bien sur un PC ancien.</small></div></li>
+    <li>Branche le PC sur secteur (ou garde la batterie bien chargée) : il ne doit pas s'éteindre pendant l'installation.</li>
+  </ol>
+</section>
+
+<section class="chap" id="c-boot" data-os="all" data-t="Démarrer sur la clé" data-i="🚀">
+  <h2>🚀 Démarrer sur la clé USB</h2>
+  <ol class="steps">
+    <li>Branche la clé et redémarre le PC.</li>
+    <li>Dès le logo, appuie plusieurs fois sur la touche du menu de démarrage : <kbd>F12</kbd> (Dell, Lenovo, Acer, Gigabyte), <kbd>F9</kbd> (HP), <kbd>F8</kbd> (Asus) ou <kbd>F11</kbd> (MSI).</li>
+    <li>Choisis ta clé dans la liste (souvent « UEFI : nom de la clé »).</li>
+    <li>Si tu utilises Ventoy, choisis l'ISO voulue dans son menu.</li>
+  </ol>
+  <div class="note">💡 Si la clé n'apparaît pas, le chapitre « Dépannage » du tuto Rufus &amp; Ventoy t'aide.</div>
+</section>
+
+<section class="chap" id="c-win" data-os="win" data-t="Installer Windows 11" data-i="🪟">
+  <h2>🪟 Installer Windows 11</h2>
+  <ol class="steps">
+    <li>L'écran de l'installateur apparaît. Choisis la <b>langue</b>, le <b>format de l'heure</b> et le <b>clavier</b> (« Français (Belgique) » ou « Français », selon ton clavier), puis <kbd>Suivant</kbd>.</li>
+    <li>Clique sur <kbd>Installer maintenant</kbd>.</li>
+    <li><b>Clé de produit :</b> saisis-la si tu en as une. Sinon clique sur « Je n'ai pas de clé de produit » : si ce PC avait déjà Windows activé, il se réactivera tout seul après l'installation.</li>
+    <li>Choisis la <b>version</b> (Famille ou Pro, selon ta licence) et accepte les conditions.</li>
+    <li>Choisis <b>« Personnalisé : installer uniquement Windows »</b>.</li>
+    <li><b>Choix du disque :</b>
+      <ul class="l"><li>Pour tout remplacer : sélectionne chaque partition de l'ancien système, clique sur « Supprimer », puis choisis l'« Espace non alloué ».</li><li>Clique sur <kbd>Suivant</kbd> : Windows crée ce qu'il faut tout seul.</li></ul></li>
+    <li>La copie des fichiers commence et le PC redémarre plusieurs fois. Quand l'écran dit « Appuyez sur une touche pour démarrer depuis le CD ou DVD… », <b>n'appuie sur rien</b> : l'installation continue depuis le disque.</li>
+    <li><b>Première configuration :</b> région, clavier, connexion au réseau, puis compte. Windows 11 demande en général un compte Microsoft. Si tu préfères un compte local, l'option « ne pas exiger de compte Microsoft » de Rufus le permet (voir le tuto Rufus).</li>
+    <li>Réponds aux questions de confidentialité (tu peux tout refuser), et ton bureau apparaît 🎉</li>
+  </ol>
+  <div class="warn">⚠️ Si aucun disque n'est proposé à l'étape 6, ton PC a besoin d'un pilote de stockage (Intel RST / VMD). Clique sur « Charger un pilote » et pointe vers le pilote téléchargé sur le site du fabricant.</div>
+</section>
+
+<section class="chap" id="c-mint" data-os="lin" data-t="Installer Linux Mint" data-i="🐧">
+  <h2>🐧 Installer Linux Mint</h2>
+  <p class="lead">Mint se lance d'abord en mode « live » : tu peux l'essayer sans rien modifier.</p>
+  <ol class="steps">
+    <li>Dans le menu de démarrage, choisis <b>« Start Linux Mint »</b>. (En cas d'écran noir, redémarre et prends le « Compatibility mode ».)</li>
+    <li>Le bureau apparaît. <b>Essaie-le</b> librement : rien n'est installé tant que tu ne lances pas l'installation.</li>
+    <li>Double-clique sur l'icône <b>« Install Linux Mint »</b> sur le bureau.</li>
+    <li>Choisis la <b>langue</b>, puis le <b>clavier</b>. Tu peux taper dans la zone de test pour vérifier que les touches sont bonnes.</li>
+    <li>Connecte-toi au Wi-Fi si besoin et coche <b>« Installer les codecs multimédia »</b> : tes vidéos et ta musique marcheront tout de suite.</li>
+    <li><b>Type d'installation :</b>
+      <ul class="l"><li><b>« Effacer le disque et installer Linux Mint »</b> : remplace tout, c'est le plus simple.</li><li><b>« Installer Linux Mint à côté de Windows »</b> (proposé si Windows est détecté) : double démarrage.</li></ul></li>
+    <li>Confirme les modifications sur le disque (<kbd>Continuer</kbd>), puis choisis ton <b>fuseau horaire</b>.</li>
+    <li>Entre ton <b>nom</b>, le <b>nom de l'ordinateur</b>, un <b>identifiant</b> et un <b>mot de passe</b> que tu retiendras.</li>
+    <li>L'installation dure environ 10 à 20 minutes. À la fin, clique sur <kbd>Redémarrer maintenant</kbd>, <b>retire la clé</b> quand c'est demandé et appuie sur <kbd>Entrée</kbd>.</li>
+  </ol>
+</section>
+
+<section class="chap" id="c-dual" data-os="all" data-t="Garder les deux systèmes" data-i="🔀">
+  <h2>🔀 Garder Windows et Linux ensemble</h2>
+  <p class="lead">Le double démarrage : au démarrage du PC, un menu te laisse choisir.</p>
+  <ol class="steps">
+    <li><b>Installe Windows en premier</b>, puis Linux ensuite. Dans l'autre sens, Windows peut écraser le menu de démarrage de Linux.</li>
+    <li><b>Libère de la place depuis Windows :</b> clic droit sur « Démarrer » → « Gestion des disques », clic droit sur le disque C: → « Réduire le volume ». Compte au moins 30 à 50 Go pour Linux.</li>
+    <li><b>Désactive le démarrage rapide</b> de Windows (Options d'alimentation → « Choisir l'action des boutons d'alimentation »). Si le disque est chiffré (BitLocker), suspends-le d'abord.</li>
+    <li>Démarre sur la clé Linux Mint, lance l'installation et choisis <b>« Installer Linux Mint à côté de Windows »</b>.</li>
+  </ol>
+  <div class="note">💡 Au démarrage, un menu (GRUB) propose « Linux Mint » ou « Windows Boot Manager ».</div>
+</section>
+
+<section class="chap" id="c-apres" data-os="all" data-t="Après l'installation" data-i="✅">
+  <h2>✅ Après l'installation</h2>
+  <div class="win"><ol class="steps">
+    <li><b>Mises à jour :</b> Paramètres → Windows Update → « Rechercher des mises à jour ». Répète jusqu'à ce qu'il n'y ait plus rien.</li>
+    <li><b>Pilotes :</b> vérifie que le Wi-Fi, le son et l'écran marchent. Sinon, prends les pilotes sur le site du fabricant du PC.</li>
+    <li><b>Sécurité :</b> Microsoft Defender est déjà là et suffit pour la plupart des gens.</li>
+    <li><b>Récupération :</b> tape « Créer un point de restauration » dans la recherche pour pouvoir revenir en arrière.</li>
+  </ol></div>
+  <div class="lin"><ol class="steps">
+    <li><b>Mises à jour :</b> ouvre le « Gestionnaire de mises à jour » et installe tout. Ou en terminal :
+      <pre><code>sudo apt update &amp;&amp; sudo apt upgrade</code></pre></li>
+    <li><b>Pilotes :</b> ouvre le « Gestionnaire de pilotes » : il propose les pilotes de la carte graphique ou du Wi-Fi si nécessaire.</li>
+    <li><b>Sauvegardes :</b> lance <b>Timeshift</b> (déjà installé) pour créer un premier instantané du système.</li>
+    <li><b>Logiciels :</b> le « Gestionnaire de logiciels » installe des applications en quelques clics (pas besoin de chercher des .exe).</li>
+  </ol></div>
+</section>
+
+<section class="chap" id="c-aide" data-os="all" data-t="Dépannage" data-i="🩺">
+  <h2>🩺 Dépannage</h2>
+  <details><summary>Le PC redémarre sur l'installateur après l'installation</summary>
+    <p>Retire la clé USB, ou place le disque interne en premier dans l'ordre de démarrage du BIOS.</p></details>
+  <details><summary>Écran noir ou figé au démarrage de la clé</summary>
+    <p class="lin">Choisis « Compatibility mode » dans le menu de Linux Mint.</p>
+    <p class="win">Essaie un autre port USB, ou recrée la clé en changeant GPT / MBR.</p></details>
+  <details><summary>Pas de Wi-Fi après l'installation</summary>
+    <p class="win">Télécharge le pilote Wi-Fi depuis un autre appareil, sur le site du fabricant du PC, puis installe-le.</p>
+    <p class="lin">Ouvre le « Gestionnaire de pilotes » : le pilote est souvent proposé là (connecte-toi en câble Ethernet pour le télécharger).</p></details>
+  <details><summary>Windows a disparu du menu après l'installation de Linux</summary>
+    <p>Dans un terminal Linux :</p><pre><code>sudo update-grub</code></pre><p>Le menu est reconstruit et Windows réapparaît.</p></details>
+</section>
+
+<section class="chap" id="c-quiz" data-os="all" data-t="Quiz" data-i="🏆">
+  <h2>🏆 Vérifie tes connaissances</h2>
+  <div id="quiz"></div>
+  <p id="score" class="lead"></p>
+</section>
+
+  </div>
+  <div class="pn"><button class="btn g" id="prev">← Précédent</button><button class="btn" id="next">Suivant →</button></div>
+  </div>
+</div>
+
+<script>
+const K="tutoInstallSysteme_v1",$=id=>document.getElementById(id);
+let S={theme:"",os:"win",cur:"",seen:{}};
+try{Object.assign(S,JSON.parse(localStorage.getItem(K)||"{}"))}catch(e){}
+if(!S.theme){try{S.theme=JSON.parse(localStorage.getItem("tutorielMenu_v1")).theme}catch(e){}S.theme=S.theme||"dark"}
+const chaps=[...document.querySelectorAll(".chap")];
+const vis=()=>chaps.filter(c=>c.dataset.os==="all"||c.dataset.os===S.os);
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+function render(){
+ document.body.dataset.theme=S.theme;document.body.dataset.os=S.os;$("theme").value=S.theme;
+ document.querySelectorAll("[data-os-btn]").forEach(b=>b.classList.toggle("on",b.dataset.osBtn===S.os));
+ const v=vis(),cur=v.find(c=>c.id===S.cur)||v[0];S.cur=cur.id;S.seen[cur.id]=1;
+ chaps.forEach(c=>c.classList.toggle("show",c===cur));
+ $("nav").innerHTML="";
+ v.forEach(c=>{const b=document.createElement("button");b.className=c===cur?"on":"";b.textContent=(S.seen[c.id]&&c!==cur?"✓ ":c.dataset.i+" ")+c.dataset.t;b.onclick=()=>{S.cur=c.id;render()};$("nav").append(b)});
+ const k=v.indexOf(cur);$("prev").disabled=k===0;$("next").disabled=k===v.length-1;
+ $("bar").style.width=Math.round(v.filter(c=>S.seen[c.id]).length/v.length*100)+"%";
+ $("content").scrollTop=0;save();
+}
+function go(d){const v=vis(),k=v.findIndex(c=>c.id===S.cur)+d;if(k>=0&&k<v.length){S.cur=v[k].id;render()}}
+$("prev").onclick=()=>go(-1);$("next").onclick=()=>go(1);
+$("theme").onchange=e=>{S.theme=e.target.value;render()};
+document.querySelectorAll("[data-os-btn]").forEach(b=>b.onclick=()=>{S.os=b.dataset.osBtn;render()});
+document.querySelectorAll("pre").forEach(p=>{const b=document.createElement("button");b.className="cp";b.textContent="📋 Copier";
+ b.onclick=()=>{const t=p.querySelector("code").textContent,done=()=>{b.textContent="✅ Copié";setTimeout(()=>b.textContent="📋 Copier",1500)};
+  const fb=()=>{const a=document.createElement("textarea");a.value=t;document.body.append(a);a.select();try{document.execCommand("copy");done()}catch(e){}a.remove()};
+  navigator.clipboard?navigator.clipboard.writeText(t).then(done).catch(fb):fb()};p.append(b)});
+const Q=[
+ {q:"Que se passe-t-il si tu choisis « Effacer le disque » ?",o:["Rien, tes fichiers sont gardés","Tout le disque est effacé","Seul Windows est supprimé"],a:1,e:"Tout est effacé : sauvegarde tes fichiers avant."},
+ {q:"Pour un double démarrage, quel système installer en premier ?",o:["Linux","Windows","Peu importe"],a:1,e:"Windows d'abord : sinon il peut écraser le menu de démarrage de Linux."},
+ {q:"Pendant l'installation de Windows, que faire au message « Appuyez sur une touche pour démarrer depuis le CD » ?",o:["Appuyer sur une touche","Ne rien faire","Débrancher le PC"],a:1,e:"Ne rien faire : l'installation continue depuis le disque."},
+ {q:"Que permet le mode « live » de Linux Mint ?",o:["Essayer Linux sans rien installer","Jouer en ligne","Réparer Windows automatiquement"],a:0,e:"On peut tester Mint depuis la clé, sans toucher au disque."}
+];
+let pts=0,rep=0;
+Q.forEach(x=>{const d=document.createElement("div");d.className="q";d.innerHTML="<b></b>";d.firstChild.textContent=x.q;
+ x.o.forEach((t,i)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>{
+  if(d.dataset.done)return;d.dataset.done=1;rep++;const ok=i===x.a;if(ok)pts++;
+  b.classList.add(ok?"ok":"ko");if(!ok)d.querySelectorAll("button")[x.a].classList.add("ok");
+  const s=document.createElement("small");s.textContent=(ok?"Bravo ! ":"Pas tout à fait. ")+x.e;d.append(s);
+  if(rep===Q.length)$("score").textContent="Score : "+pts+" / "+Q.length+(pts===Q.length?" 🎉":"")};d.append(b)});$("quiz").append(d)});
+$("pdf").onclick=()=>window.print();
+let _closed=[];
+window.addEventListener("beforeprint",()=>{_closed=[...document.querySelectorAll("details:not([open])")];_closed.forEach(d=>d.open=true)});
+window.addEventListener("afterprint",()=>{_closed.forEach(d=>d.open=false);_closed=[]});
+render();
+</script>
+</body>
+</html>
