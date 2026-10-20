@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Parentalité Numérique Positive 🎮</title>
+<style>
+:root{
+  --violet:#7c3aed; --rose:#ec4899; --jaune:#f59e0b; --vert:#10b981;
+  --bleu:#3b82f6; --rouge:#ef4444; --bg:#f5f3ff; --carte:#ffffff;
+  --ombre:0 10px 30px rgba(124,58,237,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1f2937;overflow-x:hidden}
+h1,h2,h3{font-family:'Comic Sans MS','Segoe UI',sans-serif}
+
+/* ====== NAVBAR ====== */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  display:flex;gap:6px;overflow-x:auto;padding:10px 16px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+nav a{white-space:nowrap;text-decoration:none;color:var(--violet);font-weight:700;font-size:.85rem;
+  padding:8px 14px;border-radius:999px;background:#ede9fe;transition:.25s}
+nav a:hover{background:var(--violet);color:#fff;transform:translateY(-2px)}
+
+/* ====== HERO ====== */
+.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:40px 20px;position:relative;
+  background:linear-gradient(135deg,#7c3aed 0%,#ec4899 50%,#f59e0b 100%);
+  color:#fff;overflow:hidden}
+.hero h1{font-size:clamp(2.2rem,6vw,4.2rem);animation:pop 1s cubic-bezier(.2,2,.4,1) both}
+.hero p{font-size:1.2rem;max-width:640px;margin:18px 0;opacity:.95}
+.badge{background:rgba(255,255,255,.2);border-radius:999px;padding:6px 18px;font-weight:700;
+  letter-spacing:1px;margin-bottom:18px;animation:float 3s ease-in-out infinite}
+.btn{display:inline-block;background:#fff;color:var(--violet);font-weight:800;padding:14px 30px;
+  border-radius:999px;text-decoration:none;font-size:1.05rem;box-shadow:0 8px 20px rgba(0,0,0,.2);
+  transition:.25s;cursor:pointer;border:none}
+.btn:hover{transform:scale(1.08) rotate(-2deg)}
+.blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.emoji-rain{position:absolute;font-size:2rem;animation:fall linear infinite;opacity:.85}
+@keyframes fall{from{transform:translateY(-10vh) rotate(0)}to{transform:translateY(110vh) rotate(360deg)}}
+
+/* ====== SECTIONS ====== */
+section{padding:70px 20px;max-width:1100px;margin:0 auto}
+.stitle{font-size:clamp(1.7rem,4vw,2.6rem);text-align:center;margin-bottom:10px}
+.ssub{text-align:center;color:#6b7280;max-width:680px;margin:0 auto 40px;font-size:1.05rem}
+.stitle .em{display:inline-block;animation:wiggle 2.5s ease-in-out infinite}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.reveal{opacity:0;transform:translateY(40px);transition:.7s}
+.reveal.visible{opacity:1;transform:none}
+
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--carte);border-radius:22px;padding:26px;box-shadow:var(--ombre);
+  transition:.3s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-8px) rotate(-.5deg);box-shadow:0 18px 40px rgba(124,58,237,.25)}
+.card h3{font-size:1.25rem;margin-bottom:10px}
+.card p{color:#4b5563;line-height:1.6}
+.card .ico{font-size:2.6rem;display:inline-block;margin-bottom:10px;animation:float 4s ease-in-out infinite}
+.tag{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:800;margin-bottom:10px}
+.t-violet{background:#ede9fe;color:#6d28d9}.t-rose{background:#fce7f3;color:#be185d}
+.t-jaune{background:#fef3c7;color:#b45309}.t-vert{background:#d1fae5;color:#047857}
+.t-bleu{background:#dbeafe;color:#1d4ed8}.t-rouge{background:#fee2e2;color:#b91c1c}
+
+/* timeline */
+.timeline{position:relative;margin:20px auto;max-width:800px}
+.timeline::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:5px;
+  background:linear-gradient(#f59e0b,#ec4899,#7c3aed,#3b82f6);border-radius:9px}
+.tl-item{position:relative;padding:0 0 34px 70px;opacity:0;transform:translateX(30px);transition:.6s}
+.tl-item.visible{opacity:1;transform:none}
+.tl-dot{position:absolute;left:8px;top:0;width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  background:#fff;box-shadow:var(--ombre)}
+.tl-age{font-weight:800;font-size:1.2rem;margin-bottom:4px}
+
+/* stats */
+.stat{text-align:center;padding:26px;border-radius:22px;background:#fff;box-shadow:var(--ombre)}
+.stat .big{font-size:3rem;font-weight:900;background:linear-gradient(90deg,#7c3aed,#ec4899);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ====== JEUX ====== */
+.game{background:linear-gradient(160deg,#1e1b4b,#312e81);border-radius:28px;padding:34px;
+  color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3);margin-top:20px}
+.game h3{font-size:1.5rem;margin-bottom:6px}
+.game .desc{opacity:.8;margin-bottom:18px}
+.btn-jeu{background:linear-gradient(90deg,#f59e0b,#ec4899);color:#fff;font-weight:800;
+  padding:12px 24px;border-radius:999px;border:none;cursor:pointer;font-size:1rem;transition:.25s}
+.btn-jeu:hover{transform:scale(1.07)}
+.scorebar{display:flex;gap:14px;align-items:center;margin:14px 0;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.15);padding:8px 18px;border-radius:999px;font-weight:700}
+.feedback{min-height:26px;font-weight:700;margin:8px 0}
+.ok{color:#6ee7b7}.ko{color:#fca5a5}
+
+/* quiz */
+.q-opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.1);color:#fff;
+  border:2px solid rgba(255,255,255,.25);border-radius:14px;padding:12px 16px;margin:8px 0;
+  cursor:pointer;font-size:.98rem;transition:.2s;font-family:inherit}
+.q-opt:hover{background:rgba(255,255,255,.25);transform:translateX(6px)}
+.q-opt.good{background:#10b981;border-color:#10b981}
+.q-opt.bad{background:#ef4444;border-color:#ef4444}
+
+/* vrai/faux */
+.vf-ecran{display:flex;flex-direction:column;gap:14px;align-items:center}
+.vf-card{background:#fff;color:#1f2937;border-radius:20px;padding:22px 26px;font-size:1.05rem;
+  font-weight:600;max-width:560px;width:100%;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.vf-btns{display:flex;gap:14px}
+.progress{height:12px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;width:100%;max-width:400px}
+.progress>div{height:100%;background:linear-gradient(90deg,#f59e0b,#ec4899);width:0;transition:.5s;border-radius:999px}
+
+/* memory */
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:460px;margin:0 auto}
+.mem-card{aspect-ratio:1;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#ec4899);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;
+  transition:.3s;color:transparent;user-select:none}
+.mem-card.flip{background:#fff;color:#1f2937;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.mem-card.matched{background:#d1fae5;cursor:default;animation:pulse .6s}
+@keyframes pulse{50%{transform:scale(1.15)}}
+
+/* attrape-danger */
+.catch-zone{position:relative;height:300px;background:rgba(255,255,255,.08);border-radius:20px;
+  overflow:hidden;cursor:crosshair;border:2px dashed rgba(255,255,255,.3)}
+.catch-obj{position:absolute;font-size:2rem;cursor:pointer;transition:transform .15s;user-select:none}
+.catch-obj:hover{transform:scale(1.3)}
+.catch-obj.gone{animation:boom .4s forwards}
+@keyframes boom{to{transform:scale(3);opacity:0}}
+.float-msg{position:absolute;font-weight:800;font-size:1.2rem;animation:fadeup 1s forwards;pointer-events:none}
+@keyframes fadeup{to{transform:translateY(-40px);opacity:0}}
+
+/* tri équilibre */
+.tri-zone{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.tri-drop{min-height:150px;border:3px dashed rgba(255,255,255,.4);border-radius:18px;padding:14px;text-align:center;font-weight:700}
+.tri-drop.over{background:rgba(255,255,255,.15)}
+.tri-chips{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.chip{background:rgba(255,255,255,.15);padding:10px 16px;border-radius:999px;cursor:grab;
+  font-weight:700;transition:.2s;user-select:none}
+.chip:active{cursor:grabbing}
+.chip:hover{background:rgba(255,255,255,.3)}
+
+/* ====== FOOTER ====== */
+footer{background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;text-align:center;padding:50px 20px;margin-top:40px}
+footer h2{margin-bottom:12px}
+.piliers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:800px;margin:30px auto}
+.pilier{background:rgba(255,255,255,.15);border-radius:18px;padding:20px;transition:.3s}
+.pilier:hover{background:rgba(255,255,255,.3);transform:translateY(-6px)}
+.pilier .ico{font-size:2.4rem;display:block;margin-bottom:8px}
+@media(max-width:600px){.mem-grid{grid-template-columns:repeat(4,1fr)}.tri-zone{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#intro">🏠 Intro</a>
+  <a href="#ages">🎂 Âges</a>
+  <a href="#cerveau">🧠 Cerveau</a>
+  <a href="#plus">✨ Positif</a>
+  <a href="#moins">⚠️ Négatif</a>
+  <a href="#science">🔬 Science</a>
+  <a href="#jeux">🎮 Jeux</a>
+  <a href="#cyber">🛡️ Sécurité</a>
+  <a href="#ia">🤖 IA</a>
+  <a href="#4pas">🍀 4 Pas</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="badge">👨‍👩‍👧‍👦 GUIDE FAMILIAL 2026</div>
+  <h1>Parentalité Numérique Positive</h1>
+  <p>Élever ses enfants à l'ère digitale : découvre le juste équilibre entre écrans et vie réelle, tout en t'amusant grâce à des quiz, jeux et animations ! 🎉</p>
+  <a class="btn" href="#intro">🚀 Commencer l'aventure</a>
+  <p style="margin-top:24px;font-size:.85rem;opacity:.8">⬇️ Fais défiler — 5 mini-jeux t'attendent ! ⬇️</p>
+</header>
+
+<!-- ================= INTRO ================= -->
+<section id="intro" class="reveal">
+  <h2 class="stitle"><span class="em">📱</span> Qu'est-ce que la parentalité numérique ?</h2>
+  <p class="ssub">La parentalité numérique désigne l'ensemble des pratiques éducatives permettant d'accompagner les enfants dans leur utilisation des technologies.</p>
+  <div class="grid g3">
+    <div class="card"><span class="ico">🌍</span><h3>Omniprésence des écrans</h3><p>Les écrans sont partout dès le plus jeune âge, et les technologies évoluent à toute vitesse. De nouvelles responsabilités attendent les parents !</p></div>
+    <div class="card"><span class="ico">⚖️</span><h3>Risques &amp; opportunités</h3><p>Risques : addiction, cyberharcèlement, contenus inappropriés. Opportunités : apprentissage, créativité, connexion sociale. Tout est question d'équilibre !</p></div>
+    <div class="card"><span class="ico">🤝</span><h3>Accompagner, pas interdire</h3><p>Les familles modernes doivent relever de nouveaux défis pour guider leurs enfants vers un usage sain et équilibré du numérique.</p></div>
+  </div>
+</section>
+
+<!-- ================= AGES ================= -->
+<section id="ages" class="reveal">
+  <h2 class="stitle"><span class="em">🎂</span> Recommandations par âge</h2>
+  <p class="ssub">À partir de quel âge introduire les écrans ? Les conseils des experts. 🧑‍⚕️</p>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-dot">👶</div><div class="tl-age">0–3 ans : zéro écran !</div><p>Les pédiatres recommandent d'éviter les écrans avant 3 ans. Le cerveau en développement a besoin d'interactions humaines et d'exploration sensorielle réelle.</p></div>
+    <div class="tl-item"><div class="tl-dot">🧒</div><div class="tl-age">3–6 ans : 30 min/jour max</div><p>Introduction progressive limitée à 30 minutes par jour maximum, toujours accompagnée d'un adulte. Privilégier les contenus éducatifs adaptés.</p></div>
+    <div class="tl-item"><div class="tl-dot">🧑</div><div class="tl-age">6–12 ans : 1h à 2h encadrées</div><p>Temps d'écran encadré (1h–2h par jour). C'est l'âge idéal pour apprendre les bases de la navigation sécurisée et développer un esprit critique face aux contenus.</p></div>
+  </div>
+</section>
+
+<!-- ================= CERVEAU ================= -->
+<section id="cerveau" class="reveal">
+  <h2 class="stitle"><span class="em">🧠</span> Développement cognitif &amp; écrans</h2>
+  <p class="ssub">Comment le cerveau de l'enfant évolue face aux technologies selon les âges.</p>
+  <div class="grid g3">
+    <div class="card"><span class="tag t-rose">0–2 ans</span><span class="ico">🗣️</span><h3>Langage en construction</h3><p>Le cerveau se développe rapidement et nécessite des interactions humaines directes. Les écrans peuvent perturber l'acquisition du langage et les capacités d'attention.</p></div>
+    <div class="card"><span class="tag t-jaune">3–6 ans</span><span class="ico">🎨</span><h3>Créativité critique</h3><p>Période critique pour la créativité et l'imagination. Une exposition modérée à des contenus éducatifs peut stimuler l'apprentissage, mais l'excès nuit à la motricité fine.</p></div>
+    <div class="card"><span class="tag t-violet">7–12 ans</span><span class="ico">🧩</span><h3>Auto-régulation</h3><p>Le cortex préfrontal se développe, permettant une meilleure autorégulation. C'est l'âge idéal pour introduire progressivement les outils numériques avec accompagnement parental.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card"><span class="tag t-vert">✅ Exposition limitée</span><span class="ico">🌱</span><h3>Connexions neuronales riches</h3><p>Avec une exposition limitée, la créativité est préservée et le cerveau construit des connexions neuronales riches.</p></div>
+    <div class="card"><span class="tag t-rouge">❌ Exposition excessive</span><span class="ico">🌪️</span><h3>Attention fragilisée</h3><p>Une exposition excessive a un impact sur l'attention et le développement cognitif de l'enfant.</p></div>
+  </div>
+  <h3 style="margin:34px 0 14px;text-align:center">Les 3 impacts sur le développement</h3>
+  <div class="grid g3">
+    <div class="card"><span class="ico">💡</span><h3>Cognitif</h3><p>Stimulation de la mémoire, résolution de problèmes et pensée critique à travers des applications éducatives adaptées.</p></div>
+    <div class="card"><span class="ico">👥</span><h3>Social</h3><p>Apprentissage des interactions virtuelles, partage et collaboration via des jeux multijoueurs encadrés.</p></div>
+    <div class="card"><span class="ico">💗</span><h3>Émotionnel</h3><p>Gestion des émotions, développement de l'empathie et régulation face aux frustrations numériques.</p></div>
+  </div>
+</section>
+
+<!-- ================= POSITIF ================= -->
+<section id="plus" class="reveal">
+  <h2 class="stitle"><span class="em">✨</span> Les points positifs de la technologie</h2>
+  <p class="ssub">La technologie peut enrichir l'apprentissage et l'intégration sociale des enfants !</p>
+  <div class="grid g2">
+    <div class="card"><span class="tag t-vert">🎓 Apprentissage</span><span class="ico">📚</span><h3>Apps éducatives</h3><p>Duolingo, Khan Academy Kids ou Scratch initient les enfants aux langues, mathématiques et programmation de manière ludique et interactive. Apprentissage personnalisé et développement de la logique.</p></div>
+    <div class="card"><span class="tag t-bleu">🌍 Ouverture</span><span class="ico">🗺️</span><h3>Accès au monde</h3><p>Internet permet de découvrir d'autres cultures, d'accéder à des musées virtuels et de communiquer avec des enfants du monde entier.</p></div>
+    <div class="card"><span class="tag t-rose">👨‍👩‍👧 Communication</h3><span class="ico">📞</span><h3>Liens familiaux</h3><p>Appels vidéo, messageries et partage de photos renforcent la communication et maintiennent les liens avec les proches éloignés.</p></div>
+    <div class="card"><span class="tag t-jaune">💼 Avenir</span><span class="ico">🚀</span><h3>Compétences futures</h3><p>La technologie prépare au monde professionnel où les compétences numériques sont devenues indispensables dans presque tous les secteurs d'activité.</p></div>
+  </div>
+</section>
+
+<!-- ================= NEGATIF ================= -->
+<section id="moins" class="reveal">
+  <h2 class="stitle"><span class="em">⚠️</span> Les points négatifs</h2>
+  <p class="ssub">Addiction, santé physique, impacts psychologiques… Restons vigilants !</p>
+  <div class="grid g4">
+    <div class="card"><span class="tag t-rouge">Addiction</span><span class="ico">🌀</span><h3>Dépendance aux écrans</h3><p>Comportements compulsifs, difficulté à se déconnecter, perte de contrôle du temps d'écran.</p></div>
+    <div class="card"><span class="tag t-rouge">Santé</span><span class="ico">😴</span><h3>Sommeil &amp; sédentarité</h3><p>Troubles du sommeil et fatigue, sédentarité et manque d'exercice, isolement social et repli sur soi.</p></div>
+    <div class="card"><span class="tag t-rouge">Corps</span><span class="ico">👓</span><h3>Vision &amp; posture</h3><p>Fatigue oculaire, maux de tête et risque de myopie. Mauvaises postures causant des tensions au cou, dos et épaules, voire des problèmes chroniques. Retard du développement moteur chez les petits.</p></div>
+    <div class="card"><span class="tag t-rouge">Psy</span><span class="ico">💔</span><h3>Impacts psychologiques</h3><p>Anxiété et dépression corrélées à l'usage excessif. Troubles de l'attention (TDAH). Cyberharcèlement pouvant causer des traumatismes durables et une baisse de l'estime de soi.</p></div>
+  </div>
+</section>
+
+<!-- ================= SCIENCE ================= -->
+<section id="science" class="reveal">
+  <h2 class="stitle"><span class="em">🔬</span> Ce que dit la science</h2>
+  <p class="ssub">Les études convergent : la qualité du contenu importe autant que la durée d'exposition.</p>
+  <div class="grid g3">
+    <div class="card"><span class="tag t-bleu">OMS 2019</span><span class="ico">🏥</span><h3>Recommandations officielles</h3><p>Pas d'écran avant 2 ans, maximum 1h/jour de 2 à 5 ans. Impact documenté sur le sommeil et l'activité physique.</p></div>
+    <div class="card"><span class="tag t-vert">Académie de Pédiatrie</span><span class="ico">🇺🇸</span><h3>Études américaines</h3><p>Effets sur le développement cognitif et social. Importance du contenu éducatif adapté à l'âge.</p></div>
+    <div class="card"><span class="tag t-violet">INSERM &amp; HCSP</span><span class="ico">🇫🇷</span><h3>Recherches françaises</h3><p>Études sur l'exposition précoce aux écrans. Recommandation « 3-6-9-12 » du Dr Serge Tisseron pour un usage progressif.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card"><span class="tag t-rose">Étude ELFE</span><span class="ico">👶</span><h3>Suivi de 18 000 enfants français</h3><p>Suivi longitudinal depuis 2011 (questionnaires parentaux et évaluations régulières du développement).</p>
+      <p style="margin-top:10px"><b>⚠️ Résultat clé :</b> les enfants exposés plus de 2h/jour aux écrans avant 3 ans montrent des retards de langage significatifs.</p></div>
+    <div class="card"><span class="tag t-jaune">Monde</span><span class="ico">🌏</span><h3>Comparaison internationale</h3><p><b>Europe :</b> limites strictes avant 3 ans, accompagnement parental obligatoire.<br><b>États-Unis :</b> approche flexible selon le développement de l'enfant.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="stat"><div class="big">2 ans</div><p>Âge avant lequel les écrans sont à éviter</p></div>
+    <div class="stat"><div class="big">1h/j</div><p>Maximum recommandé entre 2 et 5 ans</p></div>
+  </div>
+</section>
+
+<!-- ================= JEU 1 : QUIZ ================= -->
+<section id="jeux" class="reveal">
+  <h2 class="stitle"><span class="em">🎮</span> Zone de jeux !</h2>
+  <p class="ssub">Apprends la parentalité numérique en t'amusant : 5 mini-jeux interactifs ! 🏆</p>
+
+  <div class="game" id="quizGame">
+    <h3>🎯 Mini-jeu 1 : Le Grand Quiz des Écrans</h3>
+    <p class="desc">Réponds correctement et deviens un(e) champion(ne) de la parentalité numérique !</p>
+    <div class="scorebar"><span class="pill">Question <b id="qNum">1</b>/<b id="qTotal">6</b></span><span class="pill">⭐ Score : <b id="qScore">0</b></span></div>
+    <div class="progress"><div id="qProg"></div></div>
+    <p id="qText" style="font-size:1.15rem;font-weight:700;margin:18px 0"></p>
+    <div id="qOpts"></div>
+    <p class="feedback" id="qFb"></p>
+    <button class="btn-jeu" id="qNext" style="display:none" onclick="nextQ()">Suivant ➡️</button>
+  </div>
+
+  <!-- JEU 2 : VRAI/FAUX -->
+  <div class="game" id="vfGame" style="margin-top:26px">
+    <h3>🟢🔴 Mini-jeu 2 : Vrai ou Faux Éclair</h3>
+    <p class="desc">Une affirmation apparaît… Vrai ou Faux ? Va vite, champion ! ⚡</p>
+    <div class="scorebar"><span class="pill">⭐ Score : <b id="vfScore">0</b></span><span class="pill">Manche <b id="vfNum">1</b>/<b id="vfTotal">7</b></span></div>
+    <div class="vf-ecran">
+      <div class="vf-card" id="vfCard">Clique sur démarrer ! 🎬</div>
+      <div class="vf-btns">
+        <button class="btn-jeu" style="background:#10b981" onclick="vfAnswer(true)">✔️ VRAI</button>
+        <button class="btn-jeu" style="background:#ef4444" onclick="vfAnswer(false)">✖️ FAUX</button>
+      </div>
+      <p class="feedback" id="vfFb"></p>
+      <button class="btn-jeu" id="vfStart" onclick="vfStart()">▶️ Démarrer</button>
+    </div>
+  </div>
+
+  <!-- JEU 3 : MEMORY -->
+  <div class="game" id="memGame" style="margin-top:26px">
+    <h3>🃏 Mini-jeu 3 : Memory des Bonnes Habitudes</h3>
+    <p class="desc">Retrouve les paires de bonnes pratiques numériques ! Clique sur 2 cartes.</p>
+    <div class="scorebar"><span class="pill">✅ Paires : <b id="memPairs">0</b>/6</span><span class="pill">🖱️ Coups : <b id="memMoves">0</b></span></div>
+    <div class="mem-grid" id="memGrid"></div>
+    <p class="feedback" id="memFb"></p>
+  </div>
+
+  <!-- JEU 4 : ATTRAPE-DANGER -->
+  <div class="game" id="catchGame" style="margin-top:26px">
+    <h3>🚨 Mini-jeu 4 : Attrape les Dangers du Web !</h3>
+    <p class="desc">Clique sur les dangers en ligne (🕷️ prédateurs, 💀 contenus inappropriés, 🎣 phishing)… mais laisse tranquilles les bonnes choses (📚 éducatif, 🎨 créatif) ! 30 secondes !</p>
+    <div class="scorebar"><span class="pill">⏱️ <b id="catchTime">30</b>s</span><span class="pill">⭐ Score : <b id="catchScore">0</b></span><span class="pill">❤️ Vies : <b id="catchLives">3</b></span></div>
+    <div class="catch-zone" id="catchZone">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+        <p style="font-size:1.4rem;font-weight:800">Prêt(e) à protéger le web familial ? 🦸</p>
+        <button class="btn-jeu" onclick="catchStart()">▶️ Jouer !</button>
+      </div>
+    </div>
+    <p class="feedback" id="catchFb"></p>
+  </div>
+
+  <!-- JEU 5 : TRI -->
+  <div class="game" id="triGame" style="margin-top:26px">
+    <h3>⚖️ Mini-jeu 5 : La Balance Équilibre</h3>
+    <p class="desc">Glisse chaque activité dans la bonne balance : « Écran malin 📱 » ou « Vie réelle 🌳 ». Astuce : sur mobile, tape deux fois (activité puis balance) !</p>
+    <div class="scorebar"><span class="pill">⭐ Score : <b id="triScore">0</b>/8</span></div>
+    <div class="tri-chips" id="triChips"></div>
+    <div class="tri-zone">
+      <div class="tri-drop" id="dropEcran" data-cat="ecran">📱 Écran malin</div>
+      <div class="tri-drop" id="dropReel" data-cat="reel">🌳 Vie réelle</div>
+    </div>
+    <p class="feedback" id="triFb"></p>
+    <button class="btn-jeu" style="margin-top:10px" onclick="triReset()">🔄 Recommencer</button>
+  </div>
+</section>
+
+<!-- ================= TYPES DE JEUX ================= -->
+<section id="types" class="reveal">
+  <h2 class="stitle"><span class="em">🕹️</span> Bien choisir les jeux numériques</h2>
+  <p class="ssub">Tous les jeux ne se valent pas : éducatifs, créatifs ou récréatifs, à chaque âge le bon choix !</p>
+  <div class="grid g3">
+    <div class="card"><span class="tag t-vert">🎓 Éducatifs</span><span class="ico">🔤</span><h3>Apprendre en jouant</h3><p>Langues, mathématiques et sciences. Développent les compétences cognitives et la résolution de problèmes. <b>Exemples par âge :</b> 3-5 ans (puzzles, formes, couleurs), 6-8 ans (lecture, calcul, logique), 9-12 ans (programmation, sciences, langues).</p></div>
+    <div class="card"><span class="tag t-rose">🎨 Créatifs</span><span class="ico">🎵</span><h3>Imaginer &amp; créer</h3><p>Dessin numérique (Procreate Pocket, Drawing Desk), musique (GarageBand, Incredibox), programmation ludique (Scratch Jr, Lightbot, Code.org) : imagination, motricité fine et pensée computationnelle.</p></div>
+    <div class="card"><span class="tag t-jaune">🎈 Récréatifs</span><span class="ico">🏁</span><h3>Divertissement encadré</h3><p>Jeux de divertissement adaptés à l'âge, à limiter dans le temps et à superviser pour un usage équilibré.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card"><span class="tag t-violet">✔️ Critères de sélection</span><span class="ico">🔍</span><h3>La checklist des parents</h3><p>Privilégiez les jeux <b>sans publicité</b>, <b>adaptés à l'âge</b>, avec un contenu <b>pédagogique validé</b> et des <b>options de contrôle parental intégrées</b>.</p></div>
+    <div class="card"><span class="tag t-bleu">PEGI</span><span class="ico">🏷️</span><h3>Les pictogrammes PEGI</h3><p>Comprendre les pictogrammes d'âge, identifier les contenus sensibles, vérifier les avertissements. Privilégier la valeur éducative et l'équilibre divertissement/éducation.</p></div>
+  </div>
+  <div class="stat" style="margin-top:22px"><div class="big">20–45 min</div><p>Sessions conseillées : 20-30 min pour les petits, 45 min max pour les grands, avec des pauses régulières ⏸️</p></div>
+</section>
+
+<!-- ================= CYBERSECURITE ================= -->
+<section id="cyber" class="reveal">
+  <h2 class="stitle"><span class="em">🛡️</span> Cybersécurité : protéger ses enfants en ligne</h2>
+  <p class="ssub">Comprendre les risques et mettre en place des mesures préventives adaptées à chaque âge.</p>
+  <div class="grid g3">
+    <div class="card"><span class="tag t-rouge">Danger 1</span><span class="ico">🕷️</span><h3>Prédateurs en ligne</h3><p>Ils utilisent les réseaux sociaux et jeux en ligne pour cibler les enfants. Surveillez les conversations et enseignez la prudence.</p></div>
+    <div class="card"><span class="tag t-rouge">Danger 2</span><span class="ico">💀</span><h3>Contenus inappropriés</h3><p>Violence, pornographie, désinformation : les enfants peuvent y accéder facilement. Utilisez des filtres parentaux et dialoguez.</p></div>
+    <div class="card"><span class="tag t-rouge">Danger 3</span><span class="ico">🎣</span><h3>Arnaques &amp; phishing</h3><p>Faux concours, demandes d'informations personnelles… Apprenez-leur à reconnaître les signaux d'alerte.</p></div>
+  </div>
+  <div class="grid g3" style="margin-top:22px">
+    <div class="card"><span class="tag t-vert">Bouclier 1</span><span class="ico">🔐</span><h3>Contrôle parental</h3><p>Installez des logiciels de contrôle parental sur tous les appareils : filtrage des contenus, limitation du temps d'écran, surveillance de l'activité en ligne.</p></div>
+    <div class="card"><span class="tag t-vert">Bouclier 2</span><span class="ico">🤐</span><h3>Confidentialité</h3><p>Configurez les paramètres de confidentialité, désactivez la géolocalisation et limitez le partage d'informations personnelles. Mots de passe forts et uniques, jamais partagés !</p></div>
+    <div class="card"><span class="tag t-vert">Bouclier 3</span><span class="ico">💬</span><h3>Dialogue ouvert</h3><p>Communication régulière sur leurs activités numériques, les risques potentiels et l'importance de signaler tout comportement suspect. Jamais de nom complet, adresse, école ou photos sans autorisation.</p></div>
+  </div>
+</section>
+
+<!-- ================= IA ================= -->
+<section id="ia" class="reveal">
+  <h2 class="stitle"><span class="em">🤖</span> L'IA et les enfants : opportunités &amp; dangers</h2>
+  <p class="ssub">L'intelligence artificielle révolutionne l'éducation… à condition de l'encadrer !</p>
+  <div class="grid g2">
+    <div class="card"><span class="tag t-vert">✅ Avantages</span>
+      <h3 style="margin-top:8px">Ce que l'IA apporte</h3>
+      <p>🎯 <b>Apprentissage personnalisé</b> : s'adapte au rythme de chaque enfant pour un parcours sur mesure.</p>
+      <p style="margin-top:8px">📝 <b>Aide aux devoirs</b> : assistance intelligente pour comprendre et résoudre étape par étape.</p>
+      <p style="margin-top:8px">🎨 <b>Créativité stimulée</b> : outils pour dessiner, composer de la musique et inventer des histoires.</p>
+      <p style="margin-top:8px">♿ <b>Accessibilité</b> : ressources pédagogiques accessibles à tous, quelles que soient leurs capacités.</p>
+      <p style="margin-top:8px">🤓 <b>Tuteurs virtuels adaptatifs</b> : explications répétées sans frustration, suivi des progrès, disponible 24h/24, outils pour les enfants dyslexiques.</p>
+    </div>
+    <div class="card"><span class="tag t-rouge">⚠️ Dangers</span>
+      <h3 style="margin-top:8px">Ce qu'il faut surveiller</h3>
+      <p>🌀 <b>Dépendance aux écrans</b> : risque d'addiction aux applications IA et réduction des interactions sociales réelles.</p>
+      <p style="margin-top:8px">💀 <b>Contenus inappropriés</b> : l'IA peut générer ou recommander des contenus violents ou inadaptés.</p>
+      <p style="margin-top:8px">🕵️ <b>Vie privée menacée</b> : collecte de données personnelles des enfants sans consentement parental éclairé.</p>
+      <p style="margin-top:8px">📰 <b>Désinformation</b> : l'IA peut propager de fausses informations que les enfants ne savent pas identifier.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:22px"><span class="tag t-violet">Les parents au commande</span><span class="ico">🦸‍♀️</span><h3>Protéger nos enfants face à l'IA</h3><p>Supervision parentale active 👀 · Limiter le temps d'écran ⏳ · Éduquer à l'esprit critique 🧐. Les parents jouent un rôle essentiel pour accompagner leurs enfants vers une utilisation sûre et responsable.</p></div>
+</section>
+
+<!-- ================= 4 PAS ================= -->
+<section id="4pas" class="reveal">
+  <h2 class="stitle"><span class="em">🍀</span> La méthode des 4 Pas sans écran</h2>
+  <p class="ssub">Le trèfle à 4 feuilles du bien-être numérique : 4 règles d'or pour une vie plus équilibrée, enfants comme adultes !</p>
+  <div class="grid g4">
+    <div class="card"><span class="ico">🌅</span><span class="tag t-violet">1er pas</span><h3>Pas d'écran le matin</h3><p>Commencer la journée sans distraction pour mieux se concentrer.</p></div>
+    <div class="card"><span class="ico">🍽️</span><span class="tag t-rose">2e pas</span><h3>Pas d'écran avant de manger</h3><p>Favoriser les repas en famille et les échanges.</p></div>
+    <div class="card"><span class="ico">🌙</span><span class="tag t-bleu">3e pas</span><h3>Pas d'écran avant dormir</h3><p>Protéger le sommeil : on s'endort plus vite et plus profondément.</p></div>
+    <div class="card"><span class="ico">⏰</span><span class="tag t-jaune">4e pas</span><h3>Respecter le temps</h3><p>Fixer des limites claires sur le temps d'écran quotidien.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="stat"><div class="big">85%</div><p>😴 Meilleur sommeil : les enfants s'endorment plus vite et dorment plus profondément</p></div>
+    <div class="stat"><div class="big">70%</div><p>🎯 Concentration : amélioration de l'attention et des résultats scolaires</p></div>
+  </div>
+  <div class="card" style="margin-top:22px"><span class="ico">💞</span><h3>Les bienfaits pour la famille</h3><p>En suivant les 4 pas, les familles constatent des relations renforcées, plus de moments de qualité ensemble et une meilleure communication entre parents et enfants. <b>Je m'engage !</b> Imprimez les règles, affichez-les et engagez-vous ensemble à respecter ces 4 moments sans écran pour une vie plus équilibrée. (www.4passansecran.com)</p></div>
+  <h3 style="margin:34px 0 14px;text-align:center">🏠 Conseils pratiques au quotidien</h3>
+  <div class="grid g2">
+    <div class="card"><span class="tag t-violet">Règles familiales</span><span class="ico">📜</span><h3>Espaces numériques partagés</h3><p>Établir des règles claires ensemble, créer un espace numérique familial, définir des horaires d'utilisation.</p></div>
+    <div class="card"><span class="tag t-vert">Équilibre</span><span class="ico">🌳</span><h3>Écrans &amp; activités</h3><p>Alterner écrans et jeux physiques, prioriser les repas sans écrans, encourager les activités créatives et créer des moments sans écran pour renforcer les liens familiaux.</p></div>
+  </div>
+</section>
+
+<!-- ================= FOOTER / CONCLUSION ================= -->
+<footer id="conclusion">
+  <h2>🏁 Les clés du succès</h2>
+  <p style="max-width:640px;margin:0 auto">Accompagner plutôt qu'interdire : adaptez l'exposition aux écrans selon l'âge, privilégiez les contenus éducatifs de qualité, maintenez un dialogue ouvert — et surtout, montrez l'exemple ! 💡</p>
+  <div class="piliers">
+    <div class="pilier"><span class="ico">⚖️</span><b>Équilibre</b><p>Respecter les recommandations d'âge et des règles claires mais flexibles.</p></div>
+    <div class="pilier"><span class="ico">💬</span><b>Dialogue</b><p>Communiquer en continu sur les activités en ligne de vos enfants.</p></div>
+    <div class="pilier"><span class="ico">🛡️</span><b>Sécurité</b><p>Sensibiliser à la cybersécurité dès le plus jeune âge.</p></div>
+  </div>
+  <p>La technologie peut être un formidable outil de développement quand elle est utilisée avec discernement. 🌈</p>
+  <p style="margin-top:30px;opacity:.8">Merci de votre attention · Parentalité Numérique Positive · Guide familial 2026 💜</p>
+  <a class="btn" href="#top" style="margin-top:18px">⬆️ Rejouer !</a>
+</footer>
+
+<script>
+/* ============ ANIMATIONS ============ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');
+  e.target.querySelectorAll?.('.tl-item').forEach((el,i)=>setTimeout(()=>el.classList.add('visible'),i*250));}}),{threshold:.12});
+document.querySelectorAll('.reveal,.timeline').forEach(el=>io.observe(el));
+
+/* pluie d'émojis dans le hero */
+const ems=['📱','🎮','🎨','📚','🛡️','🍀','🤖','🧠','⭐','🎵'];
+for(let i=0;i<14;i++){const s=document.createElement('span');s.className='emoji-rain';
+  s.textContent=ems[i%ems.length];s.style.left=Math.random()*95+'%';
+  s.style.animationDuration=(6+Math.random()*8)+'s';s.style.animationDelay=(-Math.random()*10)+'s';
+  document.querySelector('.hero').appendChild(s);}
+const blobs=[[60,60,'top:-20px;left:-20px'],[180,180,'bottom:-40px;right:10%'],[100,100,'top:20%;right:-30px']];
+blobs.forEach(([w,h,st])=>{const b=document.createElement('div');b.className='blob';
+  b.style.cssText=`width:${w}px;height:${h}px;${st}`;b.style.animationDelay=(Math.random()*4)+'s';
+  document.querySelector('.hero').appendChild(b);});
+
+/* ============ JEU 1 : QUIZ ============ */
+const quiz=[
+ {q:"Avant quel âge les pédiatres recommandent-ils d'éviter les écrans ?",o:["1 an","3 ans","5 ans","7 ans"],a:1,e:"Les pédiatres recommandent d'éviter les écrans avant 3 ans : le cerveau a besoin d'interactions humaines !"},
+ {q:"Combien de temps d'écran maximum par jour entre 3 et 6 ans ?",o:["30 minutes","1 heure","2 heures","Aucune limite"],a:0,e:"30 min/jour maximum, toujours accompagné d'un adulte, avec des contenus éducatifs."},
+ {q:"Quelle application apprend la programmation aux enfants en s'amusant ?",o:["TikTok","Scratch","Snapchat","Roblox"],a:1,e:"Scratch (et Scratch Jr) enseignent la logique informatique de manière ludique !"},
+ {q:"Que signifie la règle « pas d'écran avant 2 ans » de l'OMS ?",o:["Une blague","Une recommandation officielle de 2019","Une loi française","Un conseil marketing"],a:1,e:"L'OMS recommande officiellement : pas d'écran avant 2 ans, max 1h/jour de 2 à 5 ans."},
+ {q:"Selon l'étude ELFE, plus de 2h/jour d'écran avant 3 ans provoque…",o:["Un retard de langage","Un meilleur sommeil","Plus de créativité","Rien du tout"],a:0,e:"L'étude ELFE (18 000 enfants) montre des retards de langage significatifs !"},
+ {q:"Combien de temps dure idéalement une session de jeu pour les petits ?",o:["1h30","2h","20-30 minutes","Toute la soirée"],a:2,e:"20-30 min pour les petits, 45 min max pour les grands, avec des pauses !"}
+];
+let qi=0,qs=0;
+function renderQ(){const q=quiz[qi];document.getElementById('qNum').textContent=qi+1;
+ document.getElementById('qText').textContent=q.q;
+ document.getElementById('qOpts').innerHTML=q.o.map((o,i)=>`<button class="q-opt" onclick="answerQ(${i})">${o}</button>`).join('');
+ document.getElementById('qFb').textContent='';document.getElementById('qNext').style.display='none';
+ document.getElementById('qProg').style.width=(qi/quiz.length*100)+'%';}
+function answerQ(i){const q=quiz[qi];const btns=document.querySelectorAll('#qOpts .q-opt');
+ btns.forEach((b,j)=>{if(j===q.a)b.classList.add('good');else b.disabled=true;});
+ const fb=document.getElementById('qFb');
+ if(i===q.a){qs++;fb.className='feedback ok';fb.textContent='🎉 Bravo ! '+q.e;}
+ else{btns[i].classList.add('bad');fb.className='feedback ko';fb.textContent='😅 Presque ! '+q.e;}
+ document.getElementById('qScore').textContent=qs;
+ document.getElementById('qNext').style.display='inline-block';}
+function nextQ(){qi++;if(qi>=quiz.length){document.getElementById('qText').textContent=
+  qs>=5?'🏆 Champion(ne) de la parentalité numérique !':qs>=3?'👏 Bien joué, continue !':'💪 Réessaie, tu vas y arriver !';
+  document.getElementById('qOpts').innerHTML='';document.getElementById('qNext').style.display='none';
+  document.getElementById('qProg').style.width='100%';document.getElementById('qFb').textContent='';
+  qi=-1;setTimeout(()=>{qi=0;qs=0;document.getElementById('qScore').textContent=0;renderQ();},4000);return;}
+ renderQ();}
+renderQ();
+
+/* ============ JEU 2 : VRAI/FAUX ============ */
+const vf=[
+ {t:"Avant 2 ans, l'OMS déconseille tout écran.",v:true},
+ {t:"Les appels vidéo renforcent les liens avec la famille éloignée.",v:true},
+ {t:"Plus un enfant passe de temps devant les écrans, plus il est créatif.",v:false},
+ {t:"Le cyberharcèlement peut causer une baisse de l'estime de soi.",v:true},
+ {t:"On peut donner son mot de passe à son meilleur ami.",v:false},
+ {t:"La méthode 4 Pas améliore le sommeil chez 85% des enfants.",v:true},
+ {t:"Les publicités dans les jeux pour enfants sont sans danger.",v:false}
+];
+let vfi=0,vfs=0,vfOn=false;
+function vfStart(){vfi=0;vfs=0;vfOn=true;document.getElementById('vfStart').style.display='none';vfShow();}
+function vfShow(){const c=document.getElementById('vfCard');
+ if(vfi>=vf.length){c.textContent=vfs>=6?'🏆 Incroyable !':vfs>=4?'👏 Super réflexe !':'💪 Tu peux mieux faire !';
+  vfOn=false;document.getElementById('vfStart').style.display='inline-block';
+  document.getElementById('vfStart').textContent='🔄 Rejouer';return;}
+ c.style.animation='pop .4s';void c.offsetWidth;
+ c.textContent=vf[vfi].t;document.getElementById('vfNum').textContent=vfi+1;
+ document.getElementById('vfFb').textContent='';}
+function vfAnswer(a){if(!vfOn)return;const it=vf[vfi];const fb=document.getElementById('vfFb');
+ if(a===it.v){vfs++;fb.className='feedback ok';fb.textContent='✅ Exact !';}
+ else{fb.className='feedback ko';fb.textContent='❌ Oups ! C\'était '+(it.v?'VRAI':'FAUX');}
+ document.getElementById('vfScore').textContent=vfs;vfi++;setTimeout(vfShow,900);}
+
+/* ============ JEU 3 : MEMORY ============ */
+const memData=[['📚','Apprendre'],['🎨','Créer'],['🌳','Jouer dehors'],['🍽️','Repas sans écran'],['🌙','Dormir sans écran'],['🔐','Protéger ses données']];
+let memDeck=[],memOpen=[],memLock=false,memP=0,memM=0;
+function memInit(){memDeck=memData.flatMap((p,pi)=>[{e:p[0],n:p[1],p:pi},{e:p[0],n:p[1],p:pi}]).sort(()=>Math.random()-.5);
+ memOpen=[];memP=0;memM=0;document.getElementById('memPairs').textContent=0;document.getElementById('memMoves').textContent=0;
+ document.getElementById('memFb').textContent='';
+ document.getElementById('memGrid').innerHTML=memDeck.map((c,i)=>
+  `<div class="mem-card" data-i="${i}" data-p="${c.p}" onclick="memFlip(this)">${c.e}<div style="font-size:.6rem">${c.n}</div></div>`).join('');}
+function memFlip(el){if(memLock||el.classList.contains('flip')||el.classList.contains('matched'))return;
+ el.classList.add('flip');memOpen.push(el);
+ if(memOpen.length===2){memM++;document.getElementById('memMoves').textContent=memM;memLock=true;
+  const[a,b]=memOpen;
+  if(a.dataset.p===b.dataset.p && a!==b){a.classList.add('matched');b.classList.add('matched');
+   memP++;document.getElementById('memPairs').textContent=memP;
+   const fb=document.getElementById('memFb');fb.className='feedback ok';
+   fb.textContent='✅ Paire trouvée : '+memDeck[a.dataset.i].n+' !';
+   memOpen=[];memLock=false;
+   if(memP===memData.length){fb.textContent='🏆 Memory maîtrisé ! Les bonnes habitudes n\'ont plus de secret pour toi !';}}
+  else{setTimeout(()=>{a.classList.remove('flip');b.classList.remove('flip');memOpen=[];memLock=false;},700);}}}
+memInit();
+
+/* ============ JEU 4 : ATTRAPE-DANGER ============ */
+let catchTimer=null,catchScore=0,catchLives=3,catchRun=false;
+const dangers=['🕷️','💀','🎣'],friends=['📚','🎨','🎵','🧩'];
+function catchStart(){catchScore=0;catchLives=3;catchRun=true;
+ document.getElementById('catchZone').innerHTML='';
+ document.getElementById('catchFb').textContent='';
+ updCatch();let t=30;document.getElementById('catchTime').textContent=t;
+ clearInterval(catchTimer);
+ catchTimer=setInterval(()=>{t--;document.getElementById('catchTime').textContent=t;
+  if(t<=0)catchEnd();},1000);
+ spawnLoop();}
+function updCatch(){document.getElementById('catchScore').textContent=catchScore;
+ document.getElementById('catchLives').textContent=catchLives;}
+function spawnLoop(){if(!catchRun)return;
+ spawnObj();setTimeout(spawnLoop,500+Math.random()*600);}
+function spawnObj(){const z=document.getElementById('catchZone');
+ const isDanger=Math.random()<.6;
+ const el=document.createElement('div');el.className='catch-obj';
+ el.textContent=isDanger?dangers[Math.floor(Math.random()*dangers.length)]:friends[Math.floor(Math.random()*friends.length)];
+ el.style.left=Math.random()*85+'%';el.style.top=Math.random()*80+'%';
+ el.onclick=()=>{if(!catchRun||!el.parentNode)return;
+  if(isDanger){catchScore++;msg('💥 Danger neutralisé ! +1','ok');}
+  else{catchLives--;catchScore=Math.max(0,catchScore-1);msg('😢 C\'était une bonne activité !','ko');}
+  el.classList.add('gone');setTimeout(()=>el.remove(),400);updCatch();
+  if(catchLives<=0)catchEnd();};
+ z.appendChild(el);
+ setTimeout(()=>{if(el.parentNode&&catchRun)el.remove();},2200);}
+function msg(t,cls){const z=document.getElementById('catchZone');
+ const m=document.createElement('div');m.className='float-msg '+(cls==='ok'?'ok':'ko');
+ m.style.cssText=`left:${40+Math.random()*20}%;top:${40+Math.random()*20}%`;
+ m.textContent=t;z.appendChild(m);setTimeout(()=>m.remove(),1000);}
+function catchEnd(){catchRun=false;clearInterval(catchTimer);
+ document.getElementById('catchZone').innerHTML=
+  `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+   <p style="font-size:1.4rem;font-weight:800">${catchScore>=10?'🏆 Web-gardien(ne) légendaire !':catchScore>=5?'👏 Beau réflexe de protection !':'💪 Entraîne-toi encore !'}</p>
+   <p>Score final : ${catchScore} ⭐</p><button class="btn-jeu" onclick="catchStart()">🔄 Rejouer</button></div>`;}
+
+/* ============ JEU 5 : TRI ============ */
+const triData=[
+ {t:'📚 App éducative de calcul',c:'ecran'},{t:'🌳 Jeu dans le parc',c:'reel'},
+ {t:'🎨 Dessin sur tablette créative',c:'ecran'},{t:'🍽️ Repas en famille sans écran',c:'reel'},
+ {t:'🏃 Foot dehors avec les copains',c:'reel'},{t:'🎵 Composer une musique sur tablette',c:'ecran'},
+ {t:'📖 Lire un livre papier',c:'reel'},{t:'🧩 Jeu de logique éducatif encadré',c:'ecran'}];
+let triSel=null;
+function triInit(){triSel=null;document.getElementById('triScore').textContent=0;document.getElementById('triFb').textContent='';
+ document.getElementById('triChips').innerHTML=triData.sort(()=>Math.random()-.5)
+  .map((d,i)=>`<span class="chip" draggable="true" data-i="${i}" onclick="triTap(${i})">${d.t}</span>`).join('');
+ document.querySelectorAll('.chip').forEach(c=>{
+  c.addEventListener('dragstart',e=>{triSel=+c.dataset.i;c.style.opacity=.5;});
+  c.addEventListener('dragend',()=>c.style.opacity=1);});
+ document.querySelectorAll('.tri-drop').forEach(d=>{
+  d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over');});
+  d.addEventListener('dragleave',()=>d.classList.remove('over'));
+  d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');triDrop(d.dataset.cat,d);});});}
+function triTap(i){document.querySelectorAll('.chip').forEach(c=>c.style.outline='');
+ const c=document.querySelector(`.chip[data-i="${i}"]`);if(!c)return;
+ c.style.outline='3px solid #f59e0b';triSel=i;}
+document.querySelectorAll('.tri-drop').forEach(d=>d.addEventListener('click',()=>{if(triSel!==null)triDrop(d.dataset.cat,d);}));
+function triDrop(cat,drop){if(triSel===null)return;
+ const d=triData[triSel];const chip=document.querySelector(`.chip[data-i="${triSel}"]`);
+ const fb=document.getElementById('triFb');
+ if(!chip||!chip.parentNode)return;
+ if(d.c===cat){const s=+document.getElementById('triScore').textContent+1;
+  document.getElementById('triScore').textContent=s;
+  fb.className='feedback ok';fb.textContent='✅ Bien classé ! '+d.t+' → '+drop.textContent.trim();
+  chip.remove();triSel=null;
+  if(s===triData.length)fb.textContent='🏆 Parfait équilibre atteint ! Toute la famille est fière de toi !';}
+ else{fb.className='feedback ko';fb.textContent='😅 Hmm, « '+d.t+' » n\'est pas dans cette balance. Regarde bien !';
+  chip.style.outline='';triSel=null;}}
+function triReset(){triInit();}
+triInit();
+</script>
+</body>
+</html>
